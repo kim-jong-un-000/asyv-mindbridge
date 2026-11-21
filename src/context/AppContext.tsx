@@ -4,6 +4,7 @@ import {
   subscribeCustomization,
   subscribeLandingMediaStatus,
   saveCustomization,
+  resetLandingImage,
   type ActiveLandingImage,
   type LandingMediaStatus
 } from '../lib/landingMedia';
@@ -787,6 +788,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     mutateCentralState('UPDATE_APP_CUSTOMIZATION', DEFAULT_APP_CUSTOMIZATION);
     firestoreCustomizationRef.current = DEFAULT_APP_CUSTOMIZATION;
     saveCustomization(DEFAULT_APP_CUSTOMIZATION).catch(err => console.warn('Firestore customization save failed:', err));
+    resetLandingImage(currentUser?.email || 'admin').catch(err => console.warn('Welcome image reset failed:', err));
     addAuditLog('APP_CUSTOMIZED', 'Admin restored official portal styling presets', 'info');
   };
 
