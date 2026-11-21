@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { User, Grade, Announcement, WellnessTip, AssignmentQuestion, AsyvColorKey } from '../../types';
 import { ASYV_COLOR_PALETTES } from '../../data/initialData';
@@ -44,6 +44,15 @@ import {
   Loader2
 } from 'lucide-react';
 import { AuditLogView } from './AuditLogView';
+import { MediaManagerView } from './MediaManagerView';
+import {
+  addLandingImage,
+  describePublish,
+  publishLandingImage,
+  resetLandingImage,
+  uploadAndPublishLandingImage,
+  DEFAULT_LANDING_IMAGE_URL
+} from '../../lib/landingMedia';
 
 const GRADES: Grade[] = ['Ingabe', 'Ingabo', 'Ijabo'];
 
@@ -51,6 +60,7 @@ type AdminTab =
   | 'overview'
   | 'students'
   | 'customization'
+  | 'media'
   | 'audit'
   | 'contacts'
   | 'announcements'
@@ -62,6 +72,7 @@ type AdminTab =
 export const DevConsole: React.FC = () => {
   const {
     currentUser,
+    landingImage,
     users,
     updateUser,
     deleteUser,
@@ -165,6 +176,9 @@ export const DevConsole: React.FC = () => {
   const [customStrategicPlanImage, setCustomStrategicPlanImage] = useState<string>(
     appCustomization?.strategicPlanImageUrl || '/assets/aistudio/download_954a9c9b.jpg'
   );
+  useEffect(() => {
+    if (landingImage?.url) setCustomStrategicPlanImage(landingImage.url);
+  }, [landingImage?.url]);
   const [customPortalLogoImage, setCustomPortalLogoImage] = useState<string>(
     appCustomization?.portalLogoImageUrl || '/assets/aistudio/download_9de94bb3.png'
   );
@@ -196,76 +210,45 @@ export const DevConsole: React.FC = () => {
   const [isUploadingHero, setIsUploadingHero] = useState(false);
   const [heroDirectUrlInput, setHeroDirectUrlInput] = useState('');
 
+  const adminLabel = currentUser?.email || 'admin';
+
   const handleAutoUploadFeaturedPhoto = async (file: File) => {
     if (!file) return;
-    if (file.size > 15 * 1024 * 1024) {
-      alert('Selected photo is too large. Please select an image under 15MB.');
-      return;
-    }
     setIsUploadingHero(true);
-    const reader = new FileReader();
-    reader.onload = async (evt) => {
-      const dataUrl = evt.target?.result as string;
-      if (!dataUrl) {
-        setIsUploadingHero(false);
-        return;
-      }
-
-      // 1. Instantly update local preview & AppContext so change shows immediately
-      setCustomStrategicPlanImage(dataUrl);
-      updateAppCustomization({ strategicPlanImageUrl: dataUrl });
-
-      // 2. Persist to server /public/uploads/ & Cloud SQL, and broadcast over WebSocket
-      try {
-        const response = await fetch('/api/upload-hero-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: dataUrl, filename: file.name })
-        });
-        const res = await response.json();
-        if (res.success && res.imageUrl) {
-          setCustomStrategicPlanImage(res.imageUrl);
-          updateAppCustomization({ strategicPlanImageUrl: res.imageUrl });
-        }
-        showToast('✓ Picture uploaded & automatically changed across the front welcoming page!');
-      } catch (err) {
-        console.warn('Network upload fallback:', err);
-        showToast('✓ Picture updated live on front page!');
-      } finally {
-        setIsUploadingHero(false);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const { item, result } = await uploadAndPublishLandingImage(file, adminLabel);
+      setCustomStrategicPlanImage(item.url);
+      showToast(describePublish(result, '✓ Picture uploaded and saved permanently on the welcome page!'));
+    } catch (err: any) {
+      alert(err?.message || 'Could not upload this picture. Please try again.');
+    } finally {
+      setIsUploadingHero(false);
+    }
   };
 
   const handleAutoResetFeaturedPhoto = async () => {
-    const originalUrl = '/assets/aistudio/download_954a9c9b.jpg';
-    setCustomStrategicPlanImage(originalUrl);
-    setHeroDirectUrlInput('');
-    updateAppCustomization({ strategicPlanImageUrl: originalUrl });
     try {
-      await fetch('/api/customization', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ strategicPlanImageUrl: originalUrl })
-      });
-    } catch (e) {}
-    showToast('✓ Restored original graduation celebration photo automatically!');
+      const result = await resetLandingImage(adminLabel);
+      setCustomStrategicPlanImage(DEFAULT_LANDING_IMAGE_URL);
+      setHeroDirectUrlInput('');
+      showToast(describePublish(result, '✓ Restored the official welcome page photo!'));
+    } catch (err: any) {
+      alert(err?.message || 'Could not restore the photo. Please try again.');
+    }
   };
 
   const handleAutoApplyPhotoUrl = async (urlToApply: string) => {
     const trimmed = urlToApply.trim();
     if (!trimmed) return;
-    setCustomStrategicPlanImage(trimmed);
-    updateAppCustomization({ strategicPlanImageUrl: trimmed });
     try {
-      await fetch('/api/customization', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ strategicPlanImageUrl: trimmed })
-      });
-    } catch (e) {}
-    showToast('✓ Front page picture updated live from URL automatically!');
+      const item = await addLandingImage('Web image', trimmed, adminLabel).catch(() => ({ id: `url-${Date.now()}`, name: 'Web image', url: trimmed }));
+      const result = await publishLandingImage(item, adminLabel);
+      setCustomStrategicPlanImage(trimmed);
+      setHeroDirectUrlInput('');
+      showToast(describePublish(result, '✓ Welcome page picture updated from URL and saved permanently!'));
+    } catch (err: any) {
+      alert(err?.message || 'Could not apply this URL. Please try again.');
+    }
   };
 
   // Editing User Form States
@@ -651,13 +634,13 @@ export const DevConsole: React.FC = () => {
       {/* Toast Alert */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-50 bg-[#1b4327] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-emerald-400/30 animate-fadeIn text-xs sm:text-sm font-semibold">
-          <CheckCircle2 className="w-5 h-5 text-[#eec149]" />
+          <CheckCircle2 className="w-5 h-5 text-[#9a6b00] dark:text-[#eec149]" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Header Banner with ASYV Brand Colors & Campus Image */}
-      <div className="relative overflow-hidden bg-[#091b11] text-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-[#245934] border-t-4 border-t-[#eec149]">
+      <div className="relative overflow-hidden bg-white dark:bg-[#091b11] text-slate-900 dark:text-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-[#245934] border-t-4 border-t-[#eec149]">
         {/* Precision Architectural Grid in Header */}
         <div className="absolute inset-0 opacity-15 pointer-events-none">
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -672,8 +655,8 @@ export const DevConsole: React.FC = () => {
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#eec149] mb-2">
-              <ShieldCheck className="w-4 h-4 text-[#eec149]" />
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#9a6b00] dark:text-[#eec149] mb-2">
+              <ShieldCheck className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
               <span>Agahozo-Shalom Youth Village</span>
               <span>·</span>
               <span>Master Administrator Command Center</span>
@@ -681,20 +664,20 @@ export const DevConsole: React.FC = () => {
             <h1 className="text-2xl sm:text-3xl font-extrabold font-display">
               Mind Bridge Real System Administration
             </h1>
-            <p className="text-xs sm:text-sm text-emerald-100/90 mt-1 max-w-2xl">
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-emerald-100/90 mt-1 max-w-2xl">
               Full administrative privileges across Ingabe, Ingabo, and Ijabo. You have total authority to input real student rosters, publish school contact numbers, set assignments, and broadcast official announcements.
             </p>
           </div>
 
-          <div className="bg-[#050f09] rounded-2xl p-4 border border-[#245934] text-xs space-y-1.5 shrink-0 min-w-[240px] shadow-md">
-            <div className="flex items-center justify-between text-emerald-300 text-[11px] font-bold uppercase">
+          <div className="bg-slate-50 dark:bg-[#050f09] rounded-2xl p-4 border border-[#245934] text-xs space-y-1.5 shrink-0 min-w-[240px] shadow-md">
+            <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-300 text-[11px] font-bold uppercase">
               <span>Admin Account:</span>
               <span className="px-2.5 py-0.5 rounded bg-[#eec149] text-slate-950 text-[10px] font-black">SUPER ADMIN</span>
             </div>
-            <div className="font-mono text-white font-bold text-sm">{currentUser.email}</div>
-            <div className="text-[11px] text-emerald-200/90 flex items-center justify-between pt-1 border-t border-[#245934]/60">
+            <div className="font-mono text-slate-900 dark:text-white font-bold text-sm">{currentUser.email}</div>
+            <div className="text-[11px] text-emerald-800 dark:text-emerald-200/90 flex items-center justify-between pt-1 border-t border-[#245934]/60">
               <span>Authority Scope:</span>
-              <span className="font-bold text-[#eec149]">All 3 Village Grades (Ingabe, Ingabo, Ijabo)</span>
+              <span className="font-bold text-[#9a6b00] dark:text-[#eec149]">All 3 Village Grades (Ingabe, Ingabo, Ijabo)</span>
             </div>
 
             <button
@@ -711,13 +694,13 @@ export const DevConsole: React.FC = () => {
       </div>
 
       {/* Navigation Tabs Bar */}
-      <div className="bg-[#091b11] rounded-2xl p-2 border-2 border-[#245934] shadow-lg flex items-center gap-1.5 overflow-x-auto text-xs font-bold">
+      <div className="bg-white dark:bg-[#091b11] rounded-2xl p-2 border-2 border-[#245934] shadow-lg flex items-center gap-1.5 overflow-x-auto text-xs font-bold">
         <button
           onClick={() => setActiveTab('overview')}
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === 'overview'
               ? 'bg-[#eec149] text-slate-950 font-black shadow-sm'
-              : 'text-emerald-100/90 hover:text-white hover:bg-white/10'
+              : 'text-slate-700 dark:text-emerald-100/90 hover:text-[#1b4327] dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/10'
           }`}
         >
           <Database className="w-4 h-4" />
@@ -729,7 +712,7 @@ export const DevConsole: React.FC = () => {
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === 'students'
               ? 'bg-[#eec149] text-slate-950 font-black shadow-sm'
-              : 'text-emerald-100/90 hover:text-white hover:bg-white/10'
+              : 'text-slate-700 dark:text-emerald-100/90 hover:text-[#1b4327] dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/10'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -741,7 +724,7 @@ export const DevConsole: React.FC = () => {
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === 'customization'
               ? 'bg-[#eec149] text-slate-950 font-black shadow-sm'
-              : 'text-emerald-100/90 hover:text-white hover:bg-white/10'
+              : 'text-slate-700 dark:text-emerald-100/90 hover:text-[#1b4327] dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/10'
           }`}
         >
           <Sparkles className="w-4 h-4" />
@@ -749,11 +732,23 @@ export const DevConsole: React.FC = () => {
         </button>
 
         <button
+          onClick={() => setActiveTab('media')}
+          className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
+            activeTab === 'media'
+              ? 'bg-[#eec149] text-slate-950 font-black shadow-sm'
+              : 'text-slate-700 dark:text-emerald-100/90 hover:text-[#1b4327] dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/10'
+          }`}
+        >
+          <Camera className="w-4 h-4" />
+          <span>Media Library</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('audit')}
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === 'audit'
               ? 'bg-[#eec149] text-slate-950 font-black shadow-sm'
-              : 'text-emerald-100/90 hover:text-white hover:bg-white/10'
+              : 'text-slate-700 dark:text-emerald-100/90 hover:text-[#1b4327] dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/10'
           }`}
         >
           <ShieldCheck className="w-4 h-4" />
@@ -765,7 +760,7 @@ export const DevConsole: React.FC = () => {
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === 'contacts'
               ? 'bg-[#eec149] text-slate-950 font-black shadow-sm'
-              : 'text-emerald-100/90 hover:text-white hover:bg-white/10'
+              : 'text-slate-700 dark:text-emerald-100/90 hover:text-[#1b4327] dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/10'
           }`}
         >
           <Phone className="w-4 h-4" />
@@ -777,7 +772,7 @@ export const DevConsole: React.FC = () => {
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === 'announcements'
               ? 'bg-[#eec149] text-slate-950 font-black shadow-sm'
-              : 'text-emerald-100/90 hover:text-white hover:bg-white/10'
+              : 'text-slate-700 dark:text-emerald-100/90 hover:text-[#1b4327] dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/10'
           }`}
         >
           <Bell className="w-4 h-4" />
@@ -789,7 +784,7 @@ export const DevConsole: React.FC = () => {
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === 'tips'
               ? 'bg-[#eec149] text-slate-950 font-black shadow-sm'
-              : 'text-emerald-100/90 hover:text-white hover:bg-white/10'
+              : 'text-slate-700 dark:text-emerald-100/90 hover:text-[#1b4327] dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/10'
           }`}
         >
           <BookOpen className="w-4 h-4" />
@@ -801,7 +796,7 @@ export const DevConsole: React.FC = () => {
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === 'assignments'
               ? 'bg-[#eec149] text-slate-950 font-black shadow-sm'
-              : 'text-emerald-100/90 hover:text-white hover:bg-white/10'
+              : 'text-slate-700 dark:text-emerald-100/90 hover:text-[#1b4327] dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/10'
           }`}
         >
           <FileCheck2 className="w-4 h-4" />
@@ -813,7 +808,7 @@ export const DevConsole: React.FC = () => {
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === 'daily-questions'
               ? 'bg-[#eec149] text-slate-950 font-black shadow-sm'
-              : 'text-emerald-100/90 hover:text-white hover:bg-white/10'
+              : 'text-slate-700 dark:text-emerald-100/90 hover:text-[#1b4327] dark:hover:text-white hover:bg-emerald-50 dark:hover:bg-white/10'
           }`}
         >
           <HelpCircle className="w-4 h-4" />
@@ -825,7 +820,7 @@ export const DevConsole: React.FC = () => {
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
             activeTab === 'sos'
               ? 'bg-rose-700 text-white shadow-xs font-black'
-              : 'text-rose-400 hover:bg-rose-950/40 hover:text-rose-300'
+              : 'text-rose-600 dark:text-rose-400 hover:bg-rose-950/40 hover:text-rose-300'
           }`}
         >
           <AlertOctagon className="w-4 h-4" />
@@ -989,59 +984,59 @@ export const DevConsole: React.FC = () => {
 
           {/* Key Metrics - Executive Command Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="bg-[#091b11] p-5 rounded-3xl border border-[#245934] shadow-md text-white">
-              <div className="text-xs font-bold uppercase tracking-wider text-emerald-300/80">Total Registered Users</div>
-              <div className="text-3xl font-black text-[#eec149] font-display tabular-nums mt-1">
+            <div className="bg-white dark:bg-[#091b11] p-5 rounded-3xl border border-[#245934] shadow-md text-slate-900 dark:text-white">
+              <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300/80">Total Registered Users</div>
+              <div className="text-3xl font-black text-[#9a6b00] dark:text-[#eec149] font-display tabular-nums mt-1">
                 {users.length}
               </div>
-              <div className="text-[11px] text-emerald-200/70 mt-1 font-mono">Ingabe, Ingabo, Ijabo</div>
+              <div className="text-[11px] text-emerald-800/80 dark:text-emerald-200/70 mt-1 font-mono">Ingabe, Ingabo, Ijabo</div>
             </div>
 
-            <div className="bg-[#091b11] p-5 rounded-3xl border border-[#245934] shadow-md text-white">
-              <div className="text-xs font-bold uppercase tracking-wider text-emerald-300/80">Students Enrolled</div>
-              <div className="text-3xl font-black text-white font-display tabular-nums mt-1">
+            <div className="bg-white dark:bg-[#091b11] p-5 rounded-3xl border border-[#245934] shadow-md text-slate-900 dark:text-white">
+              <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300/80">Students Enrolled</div>
+              <div className="text-3xl font-black text-slate-900 dark:text-white font-display tabular-nums mt-1">
                 {studentsCount}
               </div>
-              <div className="text-[11px] text-emerald-200/70 mt-1 font-mono">Village youth accounts</div>
+              <div className="text-[11px] text-emerald-800/80 dark:text-emerald-200/70 mt-1 font-mono">Village youth accounts</div>
             </div>
 
-            <div className="bg-[#091b11] p-5 rounded-3xl border border-[#245934] shadow-md text-white">
-              <div className="text-xs font-bold uppercase tracking-wider text-emerald-300/80">Grade Social Workers</div>
-              <div className="text-3xl font-black text-[#f59e0b] font-display tabular-nums mt-1">
+            <div className="bg-white dark:bg-[#091b11] p-5 rounded-3xl border border-[#245934] shadow-md text-slate-900 dark:text-white">
+              <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300/80">Grade Social Workers</div>
+              <div className="text-3xl font-black text-amber-600 dark:text-[#f59e0b] font-display tabular-nums mt-1">
                 {workersCount}
               </div>
-              <div className="text-[11px] text-emerald-200/70 mt-1 font-mono">Permanent grade leads</div>
+              <div className="text-[11px] text-emerald-800/80 dark:text-emerald-200/70 mt-1 font-mono">Permanent grade leads</div>
             </div>
 
-            <div className="bg-[#091b11] p-5 rounded-3xl border border-[#245934] shadow-md text-white">
-              <div className="text-xs font-bold uppercase tracking-wider text-emerald-300/80">Mental Champions</div>
-              <div className="text-3xl font-black text-emerald-300 font-display tabular-nums mt-1">
+            <div className="bg-white dark:bg-[#091b11] p-5 rounded-3xl border border-[#245934] shadow-md text-slate-900 dark:text-white">
+              <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300/80">Mental Champions</div>
+              <div className="text-3xl font-black text-emerald-700 dark:text-emerald-300 font-display tabular-nums mt-1">
                 {championsCount}
               </div>
-              <div className="text-[11px] text-amber-300 font-semibold mt-1 font-mono">
+              <div className="text-[11px] text-amber-700 dark:text-amber-300 font-semibold mt-1 font-mono">
                 {pendingChampionsCount} pending approval
               </div>
             </div>
           </div>
 
           {/* MASTER DYNAMIC REGISTRATION ACCESS CONTROLS (One-Click Dynamic Enable/Disable & Hide) */}
-          <div className="bg-[#091b11] rounded-3xl p-6 sm:p-7 border-2 border-[#245934] shadow-xl text-white space-y-4">
+          <div className="bg-white dark:bg-[#091b11] rounded-3xl p-6 sm:p-7 border-2 border-[#245934] shadow-xl text-slate-900 dark:text-white space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#245934]/60">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-[#1b4327] border border-[#eec149]/40 flex items-center justify-center shrink-0">
-                  <Lock className="w-5 h-5 text-[#eec149]" />
+                  <Lock className="w-5 h-5 text-[#9a6b00] dark:text-[#eec149]" />
                 </div>
                 <div>
-                  <div className="text-xs font-black uppercase tracking-wider text-[#eec149]">
+                  <div className="text-xs font-black uppercase tracking-wider text-[#9a6b00] dark:text-[#eec149]">
                     ASYV Public Access Gates
                   </div>
-                  <h2 className="text-lg sm:text-xl font-black text-white font-display">
+                  <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white font-display">
                     Dynamic Self-Registration Controls
                   </h2>
                 </div>
               </div>
 
-              <div className="text-xs text-emerald-200/80 font-mono">
+              <div className="text-xs text-emerald-800/90 dark:text-emerald-200/80 font-mono">
                 Real-Time Synchronized to Login Screen
               </div>
             </div>
@@ -1051,16 +1046,16 @@ export const DevConsole: React.FC = () => {
               <div className={`p-5 rounded-2xl border-2 transition-all space-y-3 ${
                 appCustomization?.allowPublicStudentRegistration
                   ? 'bg-[#0f2c1b] border-emerald-500/80'
-                  : 'bg-[#151c17] border-slate-700/80'
+                  : 'bg-slate-50 dark:bg-[#151c17] border-slate-200 dark:border-slate-700/80'
               }`}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-black font-display text-white">
+                      <span className="text-sm font-black font-display text-slate-900 dark:text-white">
                         Student Self-Registration Link
                       </span>
                     </div>
-                    <p className="text-xs text-emerald-200/80 mt-1">
+                    <p className="text-xs text-emerald-800/90 dark:text-emerald-200/80 mt-1">
                       {appCustomization?.allowPublicStudentRegistration
                         ? 'ALLOW: "Register New Student" link is ACTIVE and VISIBLE on the login screen for students.'
                         : 'STOPPED & HIDDEN: Register link is COMPLETELY HIDDEN. Only you or Grade Social Workers can register students.'}
@@ -1077,7 +1072,7 @@ export const DevConsole: React.FC = () => {
                 </div>
 
                 <div className="pt-2 flex items-center justify-between border-t border-white/10">
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
                     Click button to immediately change status:
                   </span>
                   <button
@@ -1116,16 +1111,16 @@ export const DevConsole: React.FC = () => {
               <div className={`p-5 rounded-2xl border-2 transition-all space-y-3 ${
                 appCustomization?.allowPublicWorkerRegistration
                   ? 'bg-[#0f2c1b] border-emerald-500/80'
-                  : 'bg-[#151c17] border-slate-700/80'
+                  : 'bg-slate-50 dark:bg-[#151c17] border-slate-200 dark:border-slate-700/80'
               }`}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-black font-display text-white">
+                      <span className="text-sm font-black font-display text-slate-900 dark:text-white">
                         Social Worker Registration Link
                       </span>
                     </div>
-                    <p className="text-xs text-emerald-200/80 mt-1">
+                    <p className="text-xs text-emerald-800/90 dark:text-emerald-200/80 mt-1">
                       {appCustomization?.allowPublicWorkerRegistration
                         ? 'ALLOW: "Register New Social Worker" link is ACTIVE and VISIBLE on the login screen.'
                         : 'STOPPED & HIDDEN: Register link is COMPLETELY HIDDEN. Social workers can only be appointed by Master Admin.'}
@@ -1142,7 +1137,7 @@ export const DevConsole: React.FC = () => {
                 </div>
 
                 <div className="pt-2 flex items-center justify-between border-t border-white/10">
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
                     Click button to immediately change status:
                   </span>
                   <button
@@ -1180,16 +1175,16 @@ export const DevConsole: React.FC = () => {
           </div>
 
           {/* OFFICIAL GRADE SOCIAL WORKERS ROSTER & DIRECT INPUT */}
-          <div className="bg-[#091b11] rounded-3xl p-6 sm:p-8 border border-[#245934] shadow-lg space-y-4 text-white">
+          <div className="bg-white dark:bg-[#091b11] rounded-3xl p-6 sm:p-8 border border-[#245934] shadow-lg space-y-4 text-slate-900 dark:text-white">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#245934]/60">
               <div>
-                <div className="text-xs font-bold uppercase tracking-wider text-[#eec149]">
+                <div className="text-xs font-bold uppercase tracking-wider text-[#9a6b00] dark:text-[#eec149]">
                   Village Leadership & Counselors
                 </div>
-                <h2 className="text-xl font-black text-white font-display">
+                <h2 className="text-xl font-black text-slate-900 dark:text-white font-display">
                   Grade Social Workers Roster
                 </h2>
-                <p className="text-xs text-emerald-200/80 mt-0.5">
+                <p className="text-xs text-emerald-800/90 dark:text-emerald-200/80 mt-0.5">
                   Input and manage the official permanent social workers assigned to each ASYV high school grade.
                 </p>
               </div>
@@ -1219,8 +1214,8 @@ export const DevConsole: React.FC = () => {
                     key={grade}
                     className={`p-5 rounded-2xl border transition-all ${
                       assignedWorker
-                        ? 'bg-[#06140c] border-[#245934] text-white shadow-xs'
-                        : 'bg-[#121f16] border-dashed border-[#eec149]/50 text-slate-200'
+                        ? 'bg-[#06140c] border-[#245934] text-slate-900 dark:text-white shadow-xs'
+                        : 'bg-amber-50/60 dark:bg-[#121f16] border-dashed border-[#eec149]/50 text-slate-700 dark:text-slate-200'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -1228,8 +1223,8 @@ export const DevConsole: React.FC = () => {
                         {grade} Grade
                       </span>
                       {assignedWorker ? (
-                        <span className="text-[11px] font-bold text-emerald-300 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                           <span>Assigned</span>
                         </span>
                       ) : (
@@ -1241,15 +1236,15 @@ export const DevConsole: React.FC = () => {
 
                     {assignedWorker ? (
                       <div className="space-y-2 mt-3">
-                        <div className="font-bold text-white text-sm">
+                        <div className="font-bold text-slate-900 dark:text-white text-sm">
                           {assignedWorker.name} {assignedWorker.familyName || ''}
                         </div>
                         <div className="text-xs font-mono text-emerald-300/90 truncate">
                           {assignedWorker.email}
                         </div>
                         {assignedWorker.phone && (
-                          <div className="text-[11px] text-emerald-200/80 flex items-center gap-1">
-                            <Phone className="w-3 h-3 text-[#eec149]" />
+                          <div className="text-[11px] text-emerald-800/90 dark:text-emerald-200/80 flex items-center gap-1">
+                            <Phone className="w-3 h-3 text-[#9a6b00] dark:text-[#eec149]" />
                             <span>{assignedWorker.phone}</span>
                           </div>
                         )}
@@ -1257,7 +1252,7 @@ export const DevConsole: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleStartEdit(assignedWorker)}
-                            className="text-xs font-bold text-[#eec149] hover:underline cursor-pointer"
+                            className="text-xs font-bold text-[#9a6b00] dark:text-[#eec149] hover:underline cursor-pointer"
                           >
                             Edit Profile
                           </button>
@@ -1269,7 +1264,7 @@ export const DevConsole: React.FC = () => {
                                 deleteUser(assignedWorker.id);
                               }
                             }}
-                            className="text-xs font-bold text-rose-400 hover:underline cursor-pointer"
+                            className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
                           >
                             Remove
                           </button>
@@ -1277,7 +1272,7 @@ export const DevConsole: React.FC = () => {
                       </div>
                     ) : (
                       <div className="space-y-3 mt-3">
-                        <p className="text-xs text-slate-300 leading-relaxed">
+                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                           No social worker is currently appointed for {grade} Grade.
                         </p>
                         <button
@@ -1303,16 +1298,16 @@ export const DevConsole: React.FC = () => {
           </div>
 
           {/* REAL DATA DATABASE CONTROLS */}
-          <div className="bg-[#091b11] rounded-3xl p-6 sm:p-8 border border-[#245934] shadow-lg space-y-6 text-white">
+          <div className="bg-white dark:bg-[#091b11] rounded-3xl p-6 sm:p-8 border border-[#245934] shadow-lg space-y-6 text-slate-900 dark:text-white">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#245934]/60">
               <div>
-                <div className="text-xs font-bold uppercase tracking-wider text-[#eec149]">
+                <div className="text-xs font-bold uppercase tracking-wider text-[#9a6b00] dark:text-[#eec149]">
                   Real Data Management & Database Storage
                 </div>
-                <h2 className="text-xl font-black text-white font-display">
+                <h2 className="text-xl font-black text-slate-900 dark:text-white font-display">
                   Database Management & Backup
                 </h2>
-                <p className="text-xs text-emerald-200/80 mt-0.5">
+                <p className="text-xs text-emerald-800/90 dark:text-emerald-200/80 mt-0.5">
                   The application is fully persistent in browser and central server. Admin maintains master control over all entered data.
                 </p>
               </div>
@@ -1324,16 +1319,16 @@ export const DevConsole: React.FC = () => {
                   className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
                   title="Export all system activity and user audit logs into CSV format"
                 >
-                  <FileSpreadsheet className="w-4 h-4 text-[#eec149]" />
+                  <FileSpreadsheet className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                   <span>Export Activity & Audit Logs (CSV)</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleDownloadBackup}
-                  className="px-4 py-2 bg-[#122b1c] hover:bg-[#1a3d28] text-emerald-200 border border-[#245934] rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5"
+                  className="px-4 py-2 bg-emerald-50 dark:bg-[#122b1c] hover:bg-emerald-100 dark:hover:bg-[#1a3d28] text-emerald-800 dark:text-emerald-200 border border-[#245934] rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5"
                 >
-                  <Download className="w-4 h-4 text-[#eec149]" />
+                  <Download className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                   <span>Download JSON Backup</span>
                 </button>
 
@@ -1397,77 +1392,77 @@ export const DevConsole: React.FC = () => {
         <div className="space-y-6">
           {/* Top Summary Statistics Cards - Executive Command */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-            <div className="bg-[#091b11] p-4 rounded-2xl border border-[#245934] shadow-sm text-white">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-300/80">
+            <div className="bg-white dark:bg-[#091b11] p-4 rounded-2xl border border-[#245934] shadow-sm text-slate-900 dark:text-white">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300/80">
                 Total Registered
               </div>
-              <div className="text-2xl font-black text-[#eec149] mt-1 font-display">
+              <div className="text-2xl font-black text-[#9a6b00] dark:text-[#eec149] mt-1 font-display">
                 {users.length}
               </div>
-              <div className="text-[11px] text-emerald-200/70 font-semibold mt-0.5">
+              <div className="text-[11px] text-emerald-800/80 dark:text-emerald-200/70 font-semibold mt-0.5">
                 All Village Accounts
               </div>
             </div>
 
-            <div className="bg-[#091b11] p-4 rounded-2xl border border-[#245934] shadow-sm text-white">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-300/80">
+            <div className="bg-white dark:bg-[#091b11] p-4 rounded-2xl border border-[#245934] shadow-sm text-slate-900 dark:text-white">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300/80">
                 Registered Students
               </div>
-              <div className="text-2xl font-black text-white mt-1 font-display">
+              <div className="text-2xl font-black text-slate-900 dark:text-white mt-1 font-display">
                 {studentsCount}
               </div>
-              <div className="text-[10px] text-emerald-200/70 font-medium mt-0.5">
+              <div className="text-[10px] text-emerald-800/80 dark:text-emerald-200/70 font-medium mt-0.5">
                 Ingabe ({users.filter(u => u.role === 'student' && u.grade === 'Ingabe').length}) · Ingabo ({users.filter(u => u.role === 'student' && u.grade === 'Ingabo').length}) · Ijabo ({users.filter(u => u.role === 'student' && u.grade === 'Ijabo').length})
               </div>
             </div>
 
-            <div className="bg-[#091b11] p-4 rounded-2xl border border-[#245934] shadow-sm text-white">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-300/80">
+            <div className="bg-white dark:bg-[#091b11] p-4 rounded-2xl border border-[#245934] shadow-sm text-slate-900 dark:text-white">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300/80">
                 Social Workers
               </div>
-              <div className="text-2xl font-black text-[#f59e0b] mt-1 font-display">
+              <div className="text-2xl font-black text-amber-600 dark:text-[#f59e0b] mt-1 font-display">
                 {workersCount}
               </div>
-              <div className="text-[11px] text-emerald-200/70 font-medium mt-0.5">
+              <div className="text-[11px] text-emerald-800/80 dark:text-emerald-200/70 font-medium mt-0.5">
                 Grade Counselors
               </div>
             </div>
 
-            <div className="bg-[#091b11] p-4 rounded-2xl border border-[#245934] shadow-sm text-white">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-300/80">
+            <div className="bg-white dark:bg-[#091b11] p-4 rounded-2xl border border-[#245934] shadow-sm text-slate-900 dark:text-white">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300/80">
                 Mental Champions
               </div>
-              <div className="text-2xl font-black text-emerald-300 mt-1 font-display">
+              <div className="text-2xl font-black text-emerald-700 dark:text-emerald-300 mt-1 font-display">
                 {championsCount}
               </div>
-              <div className="text-[11px] text-amber-300 font-medium mt-0.5">
+              <div className="text-[11px] text-amber-700 dark:text-amber-300 font-medium mt-0.5">
                 {pendingChampionsCount > 0 ? `${pendingChampionsCount} Pending Review` : 'Peer Ambassadors'}
               </div>
             </div>
 
-            <div className="bg-[#091b11] p-4 rounded-2xl border border-[#245934] shadow-sm text-white col-span-2 sm:col-span-1">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-300/80">
+            <div className="bg-white dark:bg-[#091b11] p-4 rounded-2xl border border-[#245934] shadow-sm text-slate-900 dark:text-white col-span-2 sm:col-span-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300/80">
                 Master Admins
               </div>
-              <div className="text-2xl font-black text-[#eec149] mt-1 font-display">
+              <div className="text-2xl font-black text-[#9a6b00] dark:text-[#eec149] mt-1 font-display">
                 {users.filter(u => u.role === 'developer').length}
               </div>
-              <div className="text-[11px] text-emerald-200/70 font-medium mt-0.5">
+              <div className="text-[11px] text-emerald-800/80 dark:text-emerald-200/70 font-medium mt-0.5">
                 System Superusers
               </div>
             </div>
           </div>
 
           {/* Action Bar & Search */}
-          <div className="bg-[#091b11] p-4 sm:p-5 rounded-3xl border border-[#245934] shadow-md flex flex-col md:flex-row items-center justify-between gap-3 text-white">
+          <div className="bg-white dark:bg-[#091b11] p-4 sm:p-5 rounded-3xl border border-[#245934] shadow-md flex flex-col md:flex-row items-center justify-between gap-3 text-slate-900 dark:text-white">
             <div className="relative w-full md:w-80">
-              <Search className="w-4 h-4 text-emerald-400 absolute left-3 top-3" />
+              <Search className="w-4 h-4 text-emerald-600 dark:text-emerald-400 absolute left-3 top-3" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by name, class, email, phone..."
-                className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-[#050f09] border border-[#245934] rounded-2xl text-white placeholder-emerald-200/50 focus:border-[#eec149] outline-hidden"
+                className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-[#050f09] border border-[#245934] rounded-2xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-emerald-200/50 focus:border-[#eec149] outline-hidden"
               />
             </div>
 
@@ -1475,7 +1470,7 @@ export const DevConsole: React.FC = () => {
               <select
                 value={gradeFilter}
                 onChange={(e) => setGradeFilter(e.target.value)}
-                className="px-3 py-2 text-xs bg-[#050f09] border border-[#245934] rounded-xl font-bold text-emerald-200 outline-hidden cursor-pointer"
+                className="px-3 py-2 text-xs bg-slate-50 dark:bg-[#050f09] border border-[#245934] rounded-xl font-bold text-emerald-800 dark:text-emerald-200 outline-hidden cursor-pointer"
               >
                 <option value="all">All Grades</option>
                 {GRADES.map(g => (
@@ -1486,7 +1481,7 @@ export const DevConsole: React.FC = () => {
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="px-3 py-2 text-xs bg-[#050f09] border border-[#245934] rounded-xl font-bold text-emerald-200 outline-hidden cursor-pointer"
+                className="px-3 py-2 text-xs bg-slate-50 dark:bg-[#050f09] border border-[#245934] rounded-xl font-bold text-emerald-800 dark:text-emerald-200 outline-hidden cursor-pointer"
               >
                 <option value="all">All Roles</option>
                 <option value="student">Students</option>
@@ -1498,10 +1493,10 @@ export const DevConsole: React.FC = () => {
               <button
                 type="button"
                 onClick={handleExportUsersCsv}
-                className="px-3 py-2 bg-[#122b1c] hover:bg-[#1a3d28] text-emerald-200 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 border border-[#245934]"
+                className="px-3 py-2 bg-emerald-50 dark:bg-[#122b1c] hover:bg-emerald-100 dark:hover:bg-[#1a3d28] text-emerald-800 dark:text-emerald-200 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 border border-[#245934]"
                 title="Download formatted CSV report of all registered users"
               >
-                <FileSpreadsheet className="w-4 h-4 text-[#eec149]" />
+                <FileSpreadsheet className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                 <span className="hidden sm:inline">Export Users</span>
                 <span>(CSV)</span>
               </button>
@@ -1512,7 +1507,7 @@ export const DevConsole: React.FC = () => {
                 onClick={() => setShowAddWorkerModal(true)}
                 className="px-3.5 py-2 bg-[#d95f18] hover:bg-[#b84e12] text-white rounded-xl text-xs font-black transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 shadow-xs"
               >
-                <UserPlus className="w-4 h-4 text-white" />
+                <UserPlus className="w-4 h-4 text-slate-900 dark:text-white" />
                 <span>+ Worker</span>
               </button>
 
@@ -1529,12 +1524,12 @@ export const DevConsole: React.FC = () => {
           </div>
 
           {/* Users Table */}
-          <div className="bg-[#091b11] rounded-3xl border border-[#245934] shadow-lg overflow-hidden text-white">
-            <div className="p-4 border-b border-[#245934]/60 flex items-center justify-between text-xs font-semibold text-emerald-300">
-              <span className="font-bold text-white">
+          <div className="bg-white dark:bg-[#091b11] rounded-3xl border border-[#245934] shadow-lg overflow-hidden text-slate-900 dark:text-white">
+            <div className="p-4 border-b border-[#245934]/60 flex items-center justify-between text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+              <span className="font-bold text-slate-900 dark:text-white">
                 Registered Village Accounts Directory ({filteredUsers.length} shown of {users.length})
               </span>
-              <span className="text-[11px] text-[#eec149] font-medium hidden sm:inline">
+              <span className="text-[11px] text-[#9a6b00] dark:text-[#eec149] font-medium hidden sm:inline">
                 Hover or click "See PSD" to inspect/recover forgotten user credentials
               </span>
             </div>
@@ -1542,7 +1537,7 @@ export const DevConsole: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-[#050f09] border-b border-[#245934] text-[#eec149] font-black uppercase tracking-wider text-[11px]">
+                  <tr className="bg-slate-50 dark:bg-[#050f09] border-b border-[#245934] text-[#9a6b00] dark:text-[#eec149] font-black uppercase tracking-wider text-[11px]">
                     <th className="p-3.5 pl-4">User Identity & Email</th>
                     <th className="p-3.5">Role</th>
                     <th className="p-3.5">Grade</th>
@@ -1555,7 +1550,7 @@ export const DevConsole: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-[#245934]/40">
                   {filteredUsers.map((u) => (
-                    <tr key={u.id} className="hover:bg-[#06140c] transition-colors">
+                    <tr key={u.id} className="hover:bg-emerald-50 dark:hover:bg-[#06140c] transition-colors">
                       {/* Identity & Email */}
                       <td className="p-3.5 pl-4">
                         <div className="flex items-center gap-3">
@@ -1565,11 +1560,11 @@ export const DevConsole: React.FC = () => {
                             className="w-10 h-10 rounded-xl object-cover shrink-0 border border-[#245934]"
                           />
                           <div>
-                            <div className="font-bold text-white text-sm flex items-center gap-1.5">
+                            <div className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-1.5">
                               <span>{u.name} {u.familyName || ''}</span>
                             </div>
                             <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="font-mono text-emerald-300 text-[11px]">
+                              <span className="font-mono text-emerald-700 dark:text-emerald-300 text-[11px]">
                                 {u.email}
                               </span>
                               <button
@@ -1578,7 +1573,7 @@ export const DevConsole: React.FC = () => {
                                   navigator.clipboard.writeText(u.email);
                                   showToast(`Copied email: ${u.email}`);
                                 }}
-                                className="text-emerald-400 hover:text-[#eec149] p-0.5 cursor-pointer"
+                                className="text-emerald-600 dark:text-emerald-400 hover:text-[#eec149] p-0.5 cursor-pointer"
                                 title="Copy email address"
                               >
                                 <Copy className="w-3 h-3" />
@@ -1620,7 +1615,7 @@ export const DevConsole: React.FC = () => {
                               <span className={`font-mono text-xs select-all truncate ${
                                 revealedPasswords[u.id]
                                   ? 'text-emerald-700 font-bold bg-emerald-50 px-1 py-0.5 rounded'
-                                  : 'text-slate-400 tracking-wider'
+                                  : 'text-slate-500 dark:text-slate-400 tracking-wider'
                               }`}>
                                 {revealedPasswords[u.id] ? (u.password || 'password123') : '••••••••'}
                               </span>
@@ -1654,7 +1649,7 @@ export const DevConsole: React.FC = () => {
                                   navigator.clipboard.writeText(u.password || 'password123');
                                   showToast(`Password copied for ${u.name}!`);
                                 }}
-                                className="p-1 text-slate-400 hover:text-emerald-700 hover:bg-slate-200/60 rounded cursor-pointer transition-colors"
+                                className="p-1 text-slate-500 dark:text-slate-400 hover:text-emerald-700 hover:bg-slate-200/60 rounded cursor-pointer transition-colors"
                                 title="Copy password to clipboard"
                               >
                                 <Copy className="w-3 h-3" />
@@ -1702,15 +1697,15 @@ export const DevConsole: React.FC = () => {
                               </button>
                             </div>
                           ) : (
-                            <span className="text-slate-400">Regular Student</span>
+                            <span className="text-slate-500 dark:text-slate-400">Regular Student</span>
                           )
                         ) : (
-                          <span className="text-slate-400">—</span>
+                          <span className="text-slate-500 dark:text-slate-400">—</span>
                         )}
                       </td>
 
                       {/* Registered Date */}
-                      <td className="p-3.5 text-slate-400 font-mono text-[11px]">
+                      <td className="p-3.5 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
                         {new Date(u.registeredAt).toLocaleDateString()}
                       </td>
 
@@ -1721,7 +1716,7 @@ export const DevConsole: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => setSelectedDossierUser(u)}
-                            className="px-2 py-1 text-[11px] bg-emerald-50 hover:bg-[#245934] hover:text-white text-[#245934] rounded-lg transition-colors cursor-pointer flex items-center gap-1 font-bold border border-emerald-200"
+                            className="px-2 py-1 text-[11px] bg-emerald-50 hover:bg-[#245934] hover:text-[#1b4327] dark:hover:text-white text-[#245934] rounded-lg transition-colors cursor-pointer flex items-center gap-1 font-bold border border-emerald-200"
                             title="Inspect Complete User Dossier & Info"
                           >
                             <Info className="w-3.5 h-3.5" />
@@ -1733,7 +1728,7 @@ export const DevConsole: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => impersonateUser(u)}
-                              className="px-2 py-1 text-[11px] bg-slate-100 hover:bg-[#245934] hover:text-white text-slate-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1 font-semibold"
+                              className="px-2 py-1 text-[11px] bg-slate-100 hover:bg-[#245934] hover:text-[#1b4327] dark:hover:text-white text-slate-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1 font-semibold"
                               title="Test & View App as this user"
                             >
                               <Eye className="w-3.5 h-3.5" />
@@ -1756,7 +1751,7 @@ export const DevConsole: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => setUserToDelete(u)}
-                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                               title="Delete user completely from system"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -1782,7 +1777,7 @@ export const DevConsole: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#245934] mb-1">
-                <Sparkles className="w-4 h-4 text-[#eec149]" />
+                <Sparkles className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                 <span>Master Administrator Customizer</span>
                 <span>·</span>
                 <span>Full System Frontend Control</span>
@@ -1854,7 +1849,7 @@ export const DevConsole: React.FC = () => {
             {/* School Motto & Top Banner Customization */}
             <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#245934]">
-                <Sparkles className="w-4 h-4 text-[#eec149]" />
+                <Sparkles className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                 <span>1. School Motto Banner (Visible Across All Tabs)</span>
               </div>
 
@@ -1870,7 +1865,7 @@ export const DevConsole: React.FC = () => {
                   placeholder="e.g. LEARN, ADAPT AND LEAD"
                   className="w-full px-4 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-[#245934] outline-hidden font-bold"
                 />
-                <span className="text-[11px] text-slate-400 mt-1 block">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
                   Displayed in bold uppercase on the header banner across every tab.
                 </span>
               </div>
@@ -1906,7 +1901,7 @@ export const DevConsole: React.FC = () => {
             {/* Portal Title & Branding */}
             <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#245934]">
-                <ShieldCheck className="w-4 h-4 text-[#eec149]" />
+                <ShieldCheck className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                 <span>2. Platform Names & Header Wordmark</span>
               </div>
 
@@ -1956,7 +1951,7 @@ export const DevConsole: React.FC = () => {
             {/* Front Login Notice & Registration Permissions */}
             <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#245934]">
-                <Lock className="w-4 h-4 text-[#eec149]" />
+                <Lock className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                 <span>3. Sign-In Notice & Access Governance</span>
               </div>
 
@@ -2013,7 +2008,7 @@ export const DevConsole: React.FC = () => {
             {/* Student Welcome Prompt Customization */}
             <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#245934]">
-                <HelpCircle className="w-4 h-4 text-[#eec149]" />
+                <HelpCircle className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                 <span>4. Student Welcome Check-In Prompt</span>
               </div>
 
@@ -2029,7 +2024,7 @@ export const DevConsole: React.FC = () => {
                   placeholder="e.g. Do you need any help from {workerName}, 💁‍♂️?"
                   className="w-full px-4 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-[#245934] outline-hidden font-bold"
                 />
-                <span className="text-[11px] text-slate-400 mt-1 block">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
                   Tip: Use {'{workerName}'} to automatically insert the student's assigned Grade Social Worker.
                 </span>
               </div>
@@ -2051,7 +2046,7 @@ export const DevConsole: React.FC = () => {
             <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-6 lg:col-span-2">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#245934]">
-                  <Sparkles className="w-4 h-4 text-[#eec149]" />
+                  <Sparkles className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                   <span>5. Welcoming Front Page & ASYV Strategic Photos Customization</span>
                 </div>
                 <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
@@ -2170,19 +2165,19 @@ export const DevConsole: React.FC = () => {
                     <div className="p-4 bg-slate-50 border-2 border-dashed border-emerald-500/40 rounded-2xl space-y-3.5">
                       <div className="flex flex-wrap items-center gap-3">
                         {/* Instant Automatic Upload from Computer Button */}
-                        <label className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs text-white shadow-md transition-all cursor-pointer ${
+                        <label className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs text-slate-900 dark:text-white shadow-md transition-all cursor-pointer ${
                           isUploadingHero
                             ? 'bg-emerald-900 cursor-not-allowed opacity-80'
                             : 'bg-[#245934] hover:bg-emerald-800 transform hover:scale-102'
                         }`}>
                           {isUploadingHero ? (
                             <>
-                              <Loader2 className="w-4 h-4 animate-spin text-[#eec149]" />
+                              <Loader2 className="w-4 h-4 animate-spin text-[#9a6b00] dark:text-[#eec149]" />
                               <span>Uploading & Changing...</span>
                             </>
                           ) : (
                             <>
-                              <Upload className="w-4 h-4 text-[#eec149]" />
+                              <Upload className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                               <span>Upload Picture (Auto-Changes Live)</span>
                             </>
                           )}
@@ -2245,14 +2240,14 @@ export const DevConsole: React.FC = () => {
                     const droppedFile = e.dataTransfer.files?.[0];
                     if (droppedFile) handleAutoUploadFeaturedPhoto(droppedFile);
                   }}
-                  className="lg:col-span-5 bg-gradient-to-br from-[#081810] via-[#102919] to-[#081810] p-4 rounded-2xl border-2 border-emerald-500/40 text-white flex flex-col justify-between space-y-3 relative group"
+                  className="lg:col-span-5 bg-gradient-to-br from-white via-[#f3f8f4] to-[#e6f0e9] dark:from-[#081810] dark:via-[#102919] dark:to-[#081810] p-4 rounded-2xl border-2 border-emerald-500/40 text-slate-900 dark:text-white flex flex-col justify-between space-y-3 relative group"
                 >
-                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-[#eec149] flex items-center gap-1.5">
-                      <Sparkles className="w-3 h-3 text-[#eec149]" />
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#9a6b00] dark:text-[#eec149] flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3 text-[#9a6b00] dark:text-[#eec149]" />
                       <span>Live Welcoming Screen Preview</span>
                     </span>
-                    <span className="text-[10px] text-emerald-300 font-bold">
+                    <span className="text-[10px] text-emerald-700 dark:text-emerald-300 font-bold">
                       {customAllowStudentReg ? '● Registration Active' : '○ Registration Closed'}
                     </span>
                   </div>
@@ -2267,10 +2262,10 @@ export const DevConsole: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <div className="font-bold text-xs text-[#eec149] leading-tight">
+                      <div className="font-bold text-xs text-[#9a6b00] dark:text-[#eec149] leading-tight">
                         {customPortalTitle || 'Mind Bridge'}
                       </div>
-                      <div className="text-[9px] text-emerald-200 truncate max-w-[200px]">
+                      <div className="text-[9px] text-emerald-800 dark:text-emerald-200 truncate max-w-[200px]">
                         {customPortalSubtitle}
                       </div>
                     </div>
@@ -2278,15 +2273,15 @@ export const DevConsole: React.FC = () => {
 
                   {/* Hero Headline Preview */}
                   <div className="space-y-1">
-                    <div className="text-sm font-black text-white font-display leading-tight">
+                    <div className="text-sm font-black text-slate-900 dark:text-white font-display leading-tight">
                       {customWelcomeHeroTitle || 'Welcome to Mind Bridge'}
                     </div>
-                    <div className="text-[11px] font-bold text-amber-200">
+                    <div className="text-[11px] font-bold text-amber-800 dark:text-amber-200">
                       {customWelcomeHeroSubtitle}
                     </div>
-                    <div className="p-2 bg-black/40 rounded-lg border border-emerald-900/40 text-[10px]">
-                      <span className="font-bold text-[#eec149]">“{customMotto || 'LEARN, ADAPT AND LEAD'}”</span>
-                      <span className="text-emerald-200 block text-[9px]">{customSubMotto}</span>
+                    <div className="p-2 bg-slate-100 dark:bg-black/40 rounded-lg border border-emerald-900/40 text-[10px]">
+                      <span className="font-bold text-[#9a6b00] dark:text-[#eec149]">“{customMotto || 'LEARN, ADAPT AND LEAD'}”</span>
+                      <span className="text-emerald-800 dark:text-emerald-200 block text-[9px]">{customSubMotto}</span>
                     </div>
                   </div>
 
@@ -2328,17 +2323,17 @@ export const DevConsole: React.FC = () => {
                     {/* Active Uploading Spinner */}
                     {isUploadingHero && (
                       <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center text-center p-2 z-20">
-                        <Loader2 className="w-7 h-7 text-[#eec149] animate-spin mb-1" />
-                        <span className="text-xs font-bold text-white">Uploading & Applying...</span>
-                        <span className="text-[10px] text-emerald-300">Syncing to all devices worldwide</span>
+                        <Loader2 className="w-7 h-7 text-[#9a6b00] dark:text-[#eec149] animate-spin mb-1" />
+                        <span className="text-xs font-bold text-slate-900 dark:text-white">Uploading & Applying...</span>
+                        <span className="text-[10px] text-emerald-700 dark:text-emerald-300">Syncing to all devices worldwide</span>
                       </div>
                     )}
                   </div>
 
                   {/* Live Status of Register Button */}
                   <div className="flex items-center justify-between pt-1 text-[10px]">
-                    <span className="text-slate-300 font-semibold">Student Link: {customAllowStudentReg ? 'Active' : 'Closed'}</span>
-                    <span className="text-[10px] text-[#eec149] font-bold">
+                    <span className="text-slate-600 dark:text-slate-300 font-semibold">Student Link: {customAllowStudentReg ? 'Active' : 'Closed'}</span>
+                    <span className="text-[10px] text-[#9a6b00] dark:text-[#eec149] font-bold">
                       ✓ Changes auto-sync live
                     </span>
                   </div>
@@ -2349,7 +2344,7 @@ export const DevConsole: React.FC = () => {
             {/* Inspiring Quote / Court of Encouragement Customization */}
             <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-4 lg:col-span-2">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#245934]">
-                <Sparkles className="w-4 h-4 text-[#eec149]" />
+                <Sparkles className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                 <span>5. Motivating & Emotional Support Court (Displayed After Visit & On Dashboards)</span>
               </div>
 
@@ -2365,7 +2360,7 @@ export const DevConsole: React.FC = () => {
                     placeholder="e.g. If you see far, you will go far..."
                     className="w-full px-4 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-[#245934] outline-hidden font-medium"
                   />
-                  <span className="text-[11px] text-slate-400 mt-1 block">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
                     Shown upon sign-out / after visiting, and on the student inspiration court banner.
                   </span>
                 </div>
@@ -2381,7 +2376,7 @@ export const DevConsole: React.FC = () => {
                     placeholder="e.g. Anne Heyman, ASYV Founder"
                     className="w-full px-4 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-[#245934] outline-hidden font-bold"
                   />
-                  <span className="text-[11px] text-slate-400 mt-1 block">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
                     Source or speaker attribution.
                   </span>
                 </div>
@@ -2418,7 +2413,7 @@ export const DevConsole: React.FC = () => {
                         <div className="text-[10px] font-bold text-slate-800 truncate">
                           {p.name.split(' ')[0]}
                         </div>
-                        <div className="font-mono text-[9px] text-slate-400">
+                        <div className="font-mono text-[9px] text-slate-500 dark:text-slate-400">
                           {p.hex}
                         </div>
                       </button>
@@ -2433,7 +2428,7 @@ export const DevConsole: React.FC = () => {
                   type="submit"
                   className="w-full py-3.5 bg-[#245934] hover:bg-[#1b4327] text-white font-bold rounded-2xl text-xs sm:text-sm transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
                 >
-                  <Save className="w-4 h-4 text-[#eec149]" />
+                  <Save className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                   <span>Save All Portal Customizations</span>
                 </button>
               </div>
@@ -2445,6 +2440,8 @@ export const DevConsole: React.FC = () => {
       {/* ============================================================== */}
       {/* TAB 2: AUDIT LOG & COMPLIANCE ACTIVITY                        */}
       {/* ============================================================== */}
+      {activeTab === 'media' && <MediaManagerView />}
+
       {activeTab === 'audit' && <AuditLogView />}
 
       {/* ============================================================== */}
@@ -2605,19 +2602,19 @@ export const DevConsole: React.FC = () => {
                 </div>
                 <div className="text-xs space-y-2 text-slate-700">
                   <div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase">Hotline</div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Hotline</div>
                     <div className="font-mono font-bold text-slate-900 text-sm">{contactHotline}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase">WhatsApp Crisis</div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">WhatsApp Crisis</div>
                     <div className="font-mono font-bold text-slate-900 text-sm">{contactWhatsapp}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase">Clinic Extension</div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Clinic Extension</div>
                     <div className="font-bold text-slate-900">{contactClinic}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase">Center Desk</div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Center Desk</div>
                     <div className="text-slate-800">{contactOffice}</div>
                   </div>
                 </div>
@@ -2740,7 +2737,7 @@ export const DevConsole: React.FC = () => {
                           }`}>
                             {ann.category}
                           </span>
-                          <span className="text-[11px] text-slate-400">
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400">
                             {ann.targetGrades === 'all' ? 'All Village Grades' : `${(ann.targetGrades as Grade[]).join(', ')} Grade`}
                           </span>
                         </div>
@@ -2761,7 +2758,7 @@ export const DevConsole: React.FC = () => {
                         </button>
                         <button
                           onClick={() => deleteAnnouncement(ann.id)}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg cursor-pointer"
+                          className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-rose-600 rounded-lg cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -2898,7 +2895,7 @@ export const DevConsole: React.FC = () => {
                             showToast('Deleted tip from library');
                           }
                         }}
-                        className="text-slate-400 hover:text-rose-600 p-1 cursor-pointer"
+                        className="text-slate-500 dark:text-slate-400 hover:text-rose-600 p-1 cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -3137,7 +3134,7 @@ export const DevConsole: React.FC = () => {
                     <span className="font-bold text-xs uppercase px-2 py-0.5 rounded bg-emerald-100 text-[#1b4327]">
                       {dq.grade} Grade
                     </span>
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
                       Author: {dq.socialWorkerName}
                     </span>
                   </div>
@@ -3170,7 +3167,7 @@ export const DevConsole: React.FC = () => {
           </div>
 
           {emergencyAlerts.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 text-xs">
+            <div className="py-12 text-center text-slate-500 dark:text-slate-400 text-xs">
               No emergency alerts recorded. Village atmosphere is calm.
             </div>
           ) : (
@@ -3197,7 +3194,7 @@ export const DevConsole: React.FC = () => {
                         <span className="font-bold text-slate-800 text-xs">
                           {alt.studentName} {alt.studentFamilyName} ({alt.grade} · {alt.studentClass})
                         </span>
-                        <span className="text-[11px] text-slate-400 font-mono">
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                           {new Date(alt.timestamp).toLocaleTimeString()}
                         </span>
                       </div>
@@ -3260,7 +3257,7 @@ export const DevConsole: React.FC = () => {
             <button
               type="button"
               onClick={() => setEditingUser(null)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-lg"
+              className="absolute top-5 right-5 text-slate-500 dark:text-slate-400 hover:text-slate-700 p-1.5 rounded-lg"
             >
               <X className="w-5 h-5" />
             </button>
@@ -3393,7 +3390,7 @@ export const DevConsole: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowAddStudentModal(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-lg"
+              className="absolute top-5 right-5 text-slate-500 dark:text-slate-400 hover:text-slate-700 p-1.5 rounded-lg"
             >
               <X className="w-5 h-5" />
             </button>
@@ -3526,7 +3523,7 @@ export const DevConsole: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowAddWorkerModal(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-lg cursor-pointer"
+              className="absolute top-5 right-5 text-slate-500 dark:text-slate-400 hover:text-slate-700 p-1.5 rounded-lg cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -3569,7 +3566,7 @@ export const DevConsole: React.FC = () => {
                 placeholder="worker@ingabe26 or aimable@asyv.org.rw"
                 className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-teal-700 outline-hidden font-mono"
               />
-              <span className="text-[10px] text-slate-400 mt-1 block">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block">
                 Must be unique. Single-use email policy strictly enforced.
               </span>
             </div>
@@ -3636,7 +3633,7 @@ export const DevConsole: React.FC = () => {
                 setResettingUserPassword(null);
                 setNewPasswordInput('');
               }}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-lg cursor-pointer"
+              className="absolute top-5 right-5 text-slate-500 dark:text-slate-400 hover:text-slate-700 p-1.5 rounded-lg cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -3750,7 +3747,7 @@ export const DevConsole: React.FC = () => {
             <button
               type="button"
               onClick={() => setSelectedDossierUser(null)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-lg cursor-pointer"
+              className="absolute top-5 right-5 text-slate-500 dark:text-slate-400 hover:text-slate-700 p-1.5 rounded-lg cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -3787,7 +3784,7 @@ export const DevConsole: React.FC = () => {
                       navigator.clipboard.writeText(selectedDossierUser.email);
                       showToast(`Copied ${selectedDossierUser.email}`);
                     }}
-                    className="p-1 text-slate-400 hover:text-[#245934] cursor-pointer"
+                    className="p-1 text-slate-500 dark:text-slate-400 hover:text-[#245934] cursor-pointer"
                     title="Copy email"
                   >
                     <Copy className="w-3.5 h-3.5" />
@@ -3893,7 +3890,7 @@ export const DevConsole: React.FC = () => {
                       impersonateUser(selectedDossierUser);
                       setSelectedDossierUser(null);
                     }}
-                    className="px-3.5 py-2 bg-slate-100 hover:bg-[#245934] hover:text-white text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5"
+                    className="px-3.5 py-2 bg-slate-100 hover:bg-[#245934] hover:text-[#1b4327] dark:hover:text-white text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>View App As User</span>

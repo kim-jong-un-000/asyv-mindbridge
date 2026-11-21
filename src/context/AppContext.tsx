@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import {
+  subscribeActiveLandingImage,
+  subscribeCustomization,
+  subscribeLandingMediaStatus,
+  saveCustomization,
+  type ActiveLandingImage,
+  type LandingMediaStatus
+} from '../lib/landingMedia';
 import {
   User,
   Grade,
@@ -100,6 +108,8 @@ interface AppContextType {
   appCustomization: AppCustomization;
   updateAppCustomization: (custom: Partial<AppCustomization>) => void;
   resetAppCustomization: () => void;
+  landingImage: ActiveLandingImage | null;
+  landingMediaStatus: LandingMediaStatus;
   deleteAllNonAdminUsers: () => void;
   addAnnouncement: (title: string, content: string, category: Announcement['category'], targetGrades: Grade[] | 'all') => void;
   deleteAnnouncement: (id: string) => void;
@@ -447,6 +457,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => saveToStorage(STORAGE_KEYS.KUDOS, kudosPosts), [kudosPosts]);
   useEffect(() => saveToStorage(STORAGE_KEYS.AUDIT_LOGS, auditLogs), [auditLogs]);
   useEffect(() => saveToStorage(STORAGE_KEYS.CUSTOMIZATION, appCustomization), [appCustomization]);
+
+  // Firestore is the permanent, globally synchronized source of truth for admin customization & landing media
+  const firestoreCustomizationRef = useRef<Partial<AppCustomization> | null>(null);
+  const [landingImage, setLandingImage] = useState<ActiveLandingImage | null>(null);
+  const [landingMediaStatus, setLandingMediaStatus] = useState<LandingMediaStatus>('connecting');
+  useEffect(() => {
+    const unsubs = [
+      subscribeLandingMediaStatus(setLandingMediaStatus),
+      subscribeActiveLandingImage(setLandingImage),
+      subscribeCustomization(custom => {
+        firestoreCustomizationRef.current = custom;
+        setAppCustomization(prev => ({ ...prev, ...custom }));
+      })
+    ];
+    return () => unsubs.forEach(unsub => unsub());
+  }, []);
   useEffect(() => saveToStorage(STORAGE_KEYS.SNOOZED_ALERTS, snoozedAlerts), [snoozedAlerts]);
 
   // Merge full central database state received from server
@@ -464,6 +490,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     }
     if (data.contactInfo) setContactInfo(data.contactInfo);
+    if (data.appCustomization) {
+      setAppCustomization(prev => ({ ...prev, ...data.appCustomization, ...(firestoreCustomizationRef.current || {}) }));
+    }
     if (Array.isArray(data.assignments)) setAssignments(data.assignments);
     if (Array.isArray(data.dailyQuestions)) setDailyQuestions(data.dailyQuestions);
     if (Array.isArray(data.dailyAnswers)) setDailyAnswers(data.dailyAnswers);
@@ -746,6 +775,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAppCustomization(prev => {
       const next = { ...prev, ...custom };
       mutateCentralState('UPDATE_APP_CUSTOMIZATION', next);
+      firestoreCustomizationRef.current = next;
+      saveCustomization(next).catch(err => console.warn('Firestore customization save failed:', err));
       addAuditLog('APP_CUSTOMIZED', `Admin updated global ASYV styling & customization`, 'info');
       return next;
     });
@@ -754,6 +785,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const resetAppCustomization = () => {
     setAppCustomization(DEFAULT_APP_CUSTOMIZATION);
     mutateCentralState('UPDATE_APP_CUSTOMIZATION', DEFAULT_APP_CUSTOMIZATION);
+    firestoreCustomizationRef.current = DEFAULT_APP_CUSTOMIZATION;
+    saveCustomization(DEFAULT_APP_CUSTOMIZATION).catch(err => console.warn('Firestore customization save failed:', err));
     addAuditLog('APP_CUSTOMIZED', 'Admin restored official portal styling presets', 'info');
   };
 
@@ -1782,6 +1815,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         appCustomization,
         updateAppCustomization,
         resetAppCustomization,
+        landingImage,
+        landingMediaStatus,
         deleteAllNonAdminUsers,
         addAnnouncement,
         deleteAnnouncement,

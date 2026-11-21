@@ -35,7 +35,8 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
     setLanguage,
     theme,
     toggleTheme,
-    contactInfo
+    contactInfo,
+    landingImage
   } = useApp();
 
   const [showContactsModal, setShowContactsModal] = useState(false);
@@ -181,7 +182,7 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
       <AnimatedAsyvBackground variant="auth" />
 
       {/* TOP INSTITUTIONAL NAVIGATION BAR */}
-      <header className="sticky top-0 z-40 bg-[#081810]/95 backdrop-blur-md border-b border-[#245934]/60 text-white shadow-lg transition-colors">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#081810]/95 backdrop-blur-md border-b border-[#245934]/60 text-slate-900 dark:text-white shadow-lg transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           {/* Brand with authentic ASYV Circular Emblem */}
           <div className="flex items-center gap-3">
@@ -193,13 +194,13 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
               />
             </div>
             <div>
-              <div className="font-display font-extrabold text-lg sm:text-xl text-[#eec149] leading-tight flex items-center gap-2">
+              <div className="font-display font-extrabold text-lg sm:text-xl text-[#9a6b00] dark:text-[#eec149] leading-tight flex items-center gap-2">
                 <span>{displayPortalTitle}</span>
                 <span className="hidden md:inline-block px-2 py-0.5 rounded-full bg-[#245934] text-white text-[10px] font-black tracking-wider uppercase border border-emerald-400/30">
                   Official ASYV
                 </span>
               </div>
-              <div className="text-[11px] font-bold text-emerald-200/90 leading-tight">
+              <div className="text-[11px] font-bold text-emerald-800 dark:text-emerald-200/90 leading-tight">
                 {displayPortalSubtitle}
               </div>
             </div>
@@ -208,17 +209,17 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
           {/* Action Utilities & Auth Trigger Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Language Selector */}
-            <div className="relative flex items-center gap-1.5 bg-[#0e2718] border border-[#245934] rounded-xl px-2.5 py-1.5 text-xs font-bold text-white shadow-xs">
-              <Globe className="w-3.5 h-3.5 text-[#eec149] shrink-0" />
+            <div className="relative flex items-center gap-1.5 bg-emerald-50 dark:bg-[#0e2718] border border-[#245934] rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900 dark:text-white shadow-xs">
+              <Globe className="w-3.5 h-3.5 text-[#9a6b00] dark:text-[#eec149] shrink-0" />
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as any)}
-                className="bg-transparent text-white cursor-pointer outline-hidden pr-1 font-bold text-xs"
+                className="bg-transparent text-slate-900 dark:text-white cursor-pointer outline-hidden pr-1 font-bold text-xs"
                 title="Select Interface Language"
               >
-                <option value="en" className="bg-[#081810] text-white">🇬🇧 English</option>
-                <option value="rw" className="bg-[#081810] text-white">🇷🇼 Ikinyarwanda</option>
-                <option value="fr" className="bg-[#081810] text-white">🇫🇷 Français</option>
+                <option value="en" className="bg-white dark:bg-[#081810] text-slate-900 dark:text-white">🇬🇧 English</option>
+                <option value="rw" className="bg-white dark:bg-[#081810] text-slate-900 dark:text-white">🇷🇼 Ikinyarwanda</option>
+                <option value="fr" className="bg-white dark:bg-[#081810] text-slate-900 dark:text-white">🇫🇷 Français</option>
               </select>
             </div>
 
@@ -226,11 +227,11 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2 rounded-xl bg-[#0e2718] hover:bg-[#153822] border border-[#245934] text-[#eec149] cursor-pointer transition-all shadow-xs"
+              className="p-2 rounded-xl bg-emerald-50 dark:bg-[#0e2718] hover:bg-emerald-100 dark:hover:bg-[#153822] border border-[#245934] text-[#9a6b00] dark:text-[#eec149] cursor-pointer transition-all shadow-xs"
               title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
               aria-label="Toggle theme mode"
             >
-              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-emerald-300" />}
+              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-700 dark:text-amber-300" /> : <Moon className="w-4 h-4 text-emerald-700 dark:text-emerald-300" />}
             </button>
 
             {/* Install PWA App Button */}
@@ -241,9 +242,9 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
               <button
                 type="button"
                 onClick={() => onEnterPortal('register')}
-                className="hidden sm:flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold bg-[#143d22] hover:bg-[#1a4e2c] border border-emerald-400/40 text-emerald-200 cursor-pointer transition-all"
+                className="hidden sm:flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-[#143d22] hover:bg-emerald-100 dark:hover:bg-[#1a4e2c] border border-emerald-600/40 dark:border-emerald-400/40 text-emerald-800 dark:text-emerald-200 cursor-pointer transition-all"
               >
-                <Users className="w-3.5 h-3.5 text-[#eec149]" />
+                <Users className="w-3.5 h-3.5 text-[#9a6b00] dark:text-[#eec149]" />
                 <span>{t.registerBtn}</span>
               </button>
             )}
@@ -263,9 +264,9 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
 
       {/* HERO SECTION: Authentic Village Spirit, Graduation Celebration Photo & Welcoming Card */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
-        <section className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#081810] via-[#13331d] to-[#081810] border-2 border-[#245934] shadow-2xl p-6 sm:p-10 text-white">
+        <section className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-white via-[#f3f8f4] to-[#e6f0e9] dark:from-[#081810] dark:via-[#13331d] dark:to-[#081810] border-2 border-[#245934] shadow-2xl p-6 sm:p-10 text-slate-900 dark:text-white">
           {/* Subtle architectural background pattern */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <div className="absolute inset-0 opacity-[0.07] dark:opacity-10 pointer-events-none">
             <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="welcome-grid" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -281,35 +282,35 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
             <div className="lg:col-span-7 space-y-6">
               {/* Official Badge */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1b4327] border border-[#eec149]/50 text-[#eec149] text-xs font-black uppercase tracking-wider shadow-inner">
-                <Sparkles className="w-3.5 h-3.5 text-[#eec149]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#9a6b00] dark:text-[#eec149]" />
                 <span>{t.badge}</span>
               </div>
 
               {/* Main Headline - Set by Admin or Default */}
               <div>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-display tracking-tight text-white leading-tight">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-display tracking-tight text-[#14321d] dark:text-white leading-tight">
                   {displayHeroTitle}
                 </h1>
-                <p className="text-base sm:text-lg text-[#eec149] font-bold mt-2 font-display">
+                <p className="text-base sm:text-lg text-[#9a6b00] dark:text-[#eec149] font-bold mt-2 font-display">
                   {displayHeroSubtitle}
                 </p>
               </div>
 
               {/* Village Motto Callout - Set by Admin or Default */}
-              <div className="p-4 bg-black/40 rounded-2xl border border-[#245934] shadow-inner space-y-1">
-                <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-emerald-300">
+              <div className="p-4 bg-[#245934]/[0.06] dark:bg-black/40 rounded-2xl border border-[#245934]/40 dark:border-[#245934] shadow-inner space-y-1">
+                <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#245934] dark:text-emerald-300">
                   <span>Village Motto & Creed</span>
                 </div>
-                <div className="text-xl sm:text-2xl font-black text-[#eec149] font-display">
+                <div className="text-xl sm:text-2xl font-black text-[#9a6b00] dark:text-[#eec149] font-display">
                   “{displaySchoolMotto}”
                 </div>
-                <div className="text-xs sm:text-sm text-emerald-100/90 italic font-medium">
+                <div className="text-xs sm:text-sm text-slate-600 dark:text-emerald-100/90 italic font-medium">
                   {displaySchoolSubMotto}
                 </div>
               </div>
 
               {/* Description */}
-              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-2xl">
+              <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed max-w-2xl">
                 {displayHeroDesc}
               </p>
 
@@ -332,12 +333,12 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
                     onClick={() => onEnterPortal('register')}
                     className="px-5 py-3.5 rounded-2xl bg-[#245934] hover:bg-emerald-700 text-white font-bold text-sm flex items-center gap-2 border border-emerald-400/40 shadow-md transition-all cursor-pointer transform hover:-translate-y-0.5"
                   >
-                    <Users className="w-4 h-4 text-[#eec149]" />
+                    <Users className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                     <span>{t.registerBtn}</span>
                   </button>
                 ) : (
-                  <div className="px-4 py-3 rounded-2xl bg-black/50 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center gap-2 shadow-inner">
-                    <Lock className="w-3.5 h-3.5 text-amber-400" />
+                  <div className="px-4 py-3 rounded-2xl bg-amber-50 dark:bg-black/50 border border-amber-500/40 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs font-bold flex items-center gap-2 shadow-inner">
+                    <Lock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                     <span>Registration Closed by Administrator</span>
                   </div>
                 )}
@@ -345,23 +346,23 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
                 <button
                   type="button"
                   onClick={() => setShowContactsModal(true)}
-                  className="px-4 py-3.5 rounded-2xl bg-black/40 hover:bg-black/60 text-emerald-200 font-bold text-xs flex items-center gap-2 border border-[#245934] shadow-xs transition-all cursor-pointer"
+                  className="px-4 py-3.5 rounded-2xl bg-white dark:bg-black/40 hover:bg-emerald-50 dark:hover:bg-black/60 text-[#1b4327] dark:text-emerald-200 font-bold text-xs flex items-center gap-2 border border-[#245934] shadow-xs transition-all cursor-pointer"
                 >
-                  <PhoneCall className="w-4 h-4 text-[#eec149]" />
+                  <PhoneCall className="w-4 h-4 text-[#d95f18] dark:text-[#eec149]" />
                   <span>{t.contactsBtn}</span>
                 </button>
               </div>
 
               {/* Grades Supported Chips */}
               <div className="pt-2 flex flex-wrap items-center gap-2 text-xs">
-                <span className="text-slate-400 font-semibold">{t.gradesCovered}:</span>
-                <span className="px-3 py-1 rounded-xl bg-[#0e2718] border border-emerald-500/40 text-emerald-200 font-bold">
+                <span className="text-slate-600 dark:text-slate-400 font-semibold">{t.gradesCovered}:</span>
+                <span className="px-3 py-1 rounded-xl bg-emerald-50 dark:bg-[#0e2718] border border-emerald-500/40 text-emerald-800 dark:text-emerald-200 font-bold">
                   Senior 4 Ingabe
                 </span>
-                <span className="px-3 py-1 rounded-xl bg-[#0e2718] border border-amber-500/40 text-amber-200 font-bold">
+                <span className="px-3 py-1 rounded-xl bg-amber-50 dark:bg-[#0e2718] border border-amber-500/40 text-amber-800 dark:text-amber-200 font-bold">
                   Senior 5 Ingabo
                 </span>
-                <span className="px-3 py-1 rounded-xl bg-[#0e2718] border border-orange-500/40 text-orange-200 font-bold">
+                <span className="px-3 py-1 rounded-xl bg-orange-50 dark:bg-[#0e2718] border border-orange-500/40 text-orange-800 dark:text-orange-200 font-bold">
                   Senior 6 Ijabo
                 </span>
               </div>
@@ -376,7 +377,7 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
                 <div className="relative rounded-3xl overflow-hidden bg-black border-2 border-[#eec149]/80 shadow-2xl">
                   {/* The featured graduation celebration photo - uploaded and customized by Admin */}
                   <img
-                    src={appCustomization?.strategicPlanImageUrl || '/assets/aistudio/download_954a9c9b.jpg'}
+                    src={landingImage?.url || appCustomization?.strategicPlanImageUrl || '/assets/aistudio/download_954a9c9b.jpg'}
                     alt={displayStratTitle}
                     className="w-full h-auto object-cover max-h-[480px] transform group-hover:scale-102 transition-transform duration-500"
                   />
@@ -402,7 +403,7 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
               </div>
 
               {/* Village Emblem Watermark Seal */}
-              <div className="mt-4 flex items-center gap-2 text-xs text-emerald-200/80 font-semibold">
+              <div className="mt-4 flex items-center gap-2 text-xs text-[#245934] dark:text-emerald-200/80 font-semibold">
                 <img
                   src={appCustomization?.portalLogoImageUrl || '/assets/aistudio/download_9de94bb3.png'}
                   alt="Official ASYV Emblem"
@@ -416,7 +417,7 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
 
         {/* FOUR CORE PILLARS OF VILLAGE CARE */}
         <section className="space-y-6">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
+          <div className="text-center max-w-2xl mx-auto space-y-2 bg-white/90 dark:bg-slate-900/80 backdrop-blur-sm rounded-3xl px-5 py-4 border border-[#245934]/20 dark:border-slate-700 shadow-sm">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#245934]/15 dark:bg-emerald-950/60 text-[#1b4327] dark:text-[#eec149] text-xs font-black uppercase tracking-wider">
               <ShieldCheck className="w-3.5 h-3.5 text-[#245934] dark:text-[#eec149]" />
               <span>Dedicated Psychosocial Support</span>
@@ -485,15 +486,15 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
         </section>
 
         {/* CALL TO ACTION BANNER: Ready to Start / Sign In */}
-        <section className="rounded-3xl bg-[#091b11] text-white p-6 sm:p-8 border-2 border-[#245934] shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+        <section className="rounded-3xl bg-white dark:bg-[#091b11] text-slate-900 dark:text-white p-6 sm:p-8 border-2 border-[#245934] shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2 text-center md:text-left">
-            <div className="text-xs font-bold text-[#eec149] uppercase tracking-wider">
+            <div className="text-xs font-bold text-[#9a6b00] dark:text-[#eec149] uppercase tracking-wider">
               {t.creedTitle} · {displaySchoolSubMotto}
             </div>
-            <div className="text-xl sm:text-2xl font-black font-display text-white">
+            <div className="text-xl sm:text-2xl font-black font-display text-slate-900 dark:text-white">
               “{displaySchoolMotto}”
             </div>
-            <p className="text-xs text-emerald-100/90 max-w-xl">
+            <p className="text-xs text-slate-700 dark:text-emerald-100/90 max-w-xl">
               Log in to your account with your assigned student or counselor credentials to access confidential messaging, questionnaire assessments, wellness schedules, and village announcements.
             </p>
           </div>
@@ -512,18 +513,18 @@ export const WelcomeLandingPage: React.FC<WelcomeLandingPageProps> = ({ onEnterP
               <button
                 type="button"
                 onClick={() => onEnterPortal('register')}
-                className="px-5 py-3 rounded-2xl bg-transparent hover:bg-white/10 text-white font-bold text-sm flex items-center gap-2 border border-white/30 transition-all cursor-pointer"
+                className="px-5 py-3 rounded-2xl bg-transparent hover:bg-emerald-50 dark:hover:bg-white/10 text-slate-900 dark:text-white font-bold text-sm flex items-center gap-2 border border-white/30 transition-all cursor-pointer"
               >
-                <Users className="w-4 h-4 text-[#eec149]" />
+                <Users className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
                 <span>{t.registerBtn}</span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => setShowContactsModal(true)}
-                className="px-4 py-3 rounded-2xl bg-[#143d22] hover:bg-[#1a4e2c] text-emerald-200 font-bold text-xs flex items-center gap-2 border border-emerald-500/40 transition-all cursor-pointer"
+                className="px-4 py-3 rounded-2xl bg-emerald-50 dark:bg-[#143d22] hover:bg-emerald-100 dark:hover:bg-[#1a4e2c] text-emerald-800 dark:text-emerald-200 font-bold text-xs flex items-center gap-2 border border-emerald-500/40 transition-all cursor-pointer"
               >
-                <PhoneCall className="w-3.5 h-3.5 text-[#eec149]" />
+                <PhoneCall className="w-3.5 h-3.5 text-[#9a6b00] dark:text-[#eec149]" />
                 <span>{t.contactsBtn}</span>
               </button>
             )}

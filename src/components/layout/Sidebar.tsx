@@ -85,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       <aside
         className={`fixed top-0 bottom-0 left-0 z-50 w-72 ${
           isAdmin
-            ? 'bg-[#081810] border-r border-[#245934]/70 text-slate-100'
+            ? 'bg-white dark:bg-[#081810] border-r border-[#245934]/30 dark:border-[#245934]/70 text-slate-900 dark:text-slate-100'
             : 'bg-white dark:bg-slate-900 border-r border-slate-200/90 dark:border-slate-800'
         } flex flex-col transition-all duration-200 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -521,10 +521,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${
                   activePage === 'dashboard'
                     ? 'bg-[#153822] text-[#eec149] font-bold border border-[#eec149]/50 shadow-xs'
-                    : 'text-emerald-100/80 hover:bg-white/10 hover:text-white'
+                    : 'text-slate-700 dark:text-emerald-100/80 hover:bg-emerald-50 dark:hover:bg-white/10 hover:text-[#1b4327] dark:hover:text-white'
                 }`}
               >
-                <LayoutDashboard className="w-4 h-4 text-[#eec149]" />
+                <LayoutDashboard className="w-4 h-4 text-[#b8860b] dark:text-[#eec149]" />
                 <span>{t.navDevConsole}</span>
               </button>
 
@@ -533,7 +533,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${
                   activePage === 'wellbeing-hub'
                     ? 'bg-[#153822] text-[#eec149] font-bold border border-[#eec149]/50 shadow-xs'
-                    : 'text-emerald-100/80 hover:bg-white/10 hover:text-white'
+                    : 'text-slate-700 dark:text-emerald-100/80 hover:bg-emerald-50 dark:hover:bg-white/10 hover:text-[#1b4327] dark:hover:text-white'
                 }`}
               >
                 <Sparkles className="w-4 h-4 text-[#f59e0b]" />
@@ -545,10 +545,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${
                   activePage === 'admin-settings'
                     ? 'bg-[#153822] text-[#eec149] font-bold border border-[#eec149]/50 shadow-xs'
-                    : 'text-emerald-100/80 hover:bg-white/10 hover:text-white'
+                    : 'text-slate-700 dark:text-emerald-100/80 hover:bg-emerald-50 dark:hover:bg-white/10 hover:text-[#1b4327] dark:hover:text-white'
                 }`}
               >
-                <Settings className="w-4 h-4 text-emerald-300" />
+                <Settings className="w-4 h-4 text-[#245934] dark:text-emerald-300" />
                 <span>{t.navContacts}</span>
               </button>
 
@@ -557,10 +557,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${
                   activePage === 'users'
                     ? 'bg-[#153822] text-[#eec149] font-bold border border-[#eec149]/50 shadow-xs'
-                    : 'text-emerald-100/80 hover:bg-white/10 hover:text-white'
+                    : 'text-slate-700 dark:text-emerald-100/80 hover:bg-emerald-50 dark:hover:bg-white/10 hover:text-[#1b4327] dark:hover:text-white'
                 }`}
               >
-                <Users className="w-4 h-4 text-emerald-300" />
+                <Users className="w-4 h-4 text-[#245934] dark:text-emerald-300" />
                 <span>{t.navUserManagement}</span>
               </button>
 
@@ -569,10 +569,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${
                   activePage === 'champion-apps'
                     ? 'bg-[#153822] text-[#eec149] font-bold border border-[#eec149]/50 shadow-xs'
-                    : 'text-emerald-100/80 hover:bg-white/10 hover:text-white'
+                    : 'text-slate-700 dark:text-emerald-100/80 hover:bg-emerald-50 dark:hover:bg-white/10 hover:text-[#1b4327] dark:hover:text-white'
                 }`}
               >
-                <ShieldCheck className="w-4 h-4 text-[#eec149]" />
+                <ShieldCheck className="w-4 h-4 text-[#b8860b] dark:text-[#eec149]" />
                 <span>{t.navChampionApps}</span>
               </button>
 
@@ -581,10 +581,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${
                   activePage === 'contact-info'
                     ? 'bg-[#153822] text-[#eec149] font-bold border border-[#eec149]/50 shadow-xs'
-                    : 'text-emerald-100/80 hover:bg-white/10 hover:text-white'
+                    : 'text-slate-700 dark:text-emerald-100/80 hover:bg-emerald-50 dark:hover:bg-white/10 hover:text-[#1b4327] dark:hover:text-white'
                 }`}
               >
-                <PhoneCall className="w-4 h-4 text-emerald-300" />
+                <PhoneCall className="w-4 h-4 text-[#245934] dark:text-emerald-300" />
                 <span>{t.navContacts}</span>
               </button>
             </>
@@ -597,7 +597,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Bottom Profile and Logout Section */}
-        <div className={`p-4 border-t ${isAdmin ? 'border-[#245934]/60 bg-[#06120b]' : 'border-slate-200/80 bg-slate-50/80'}`}>
+        <div className={`p-4 border-t ${isAdmin ? 'border-[#245934]/30 bg-emerald-50/70 dark:border-[#245934]/60 dark:bg-[#06120b]' : 'border-slate-200/80 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-900/80'}`}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2.5 truncate">
               <div className="w-9 h-9 rounded-full bg-white dark:bg-slate-800 p-0.5 border border-[#245934]/30 shadow-xs flex items-center justify-center shrink-0 overflow-hidden">

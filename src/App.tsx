@@ -134,7 +134,7 @@ const MainLayout: React.FC = () => {
   const isAdmin = currentUser.role === 'developer';
 
   return (
-    <div className={`min-h-screen flex flex-col ${isAdmin ? 'text-slate-100' : 'text-slate-900 dark:text-slate-100'} transition-colors relative`}>
+    <div className={`min-h-screen flex flex-col text-slate-900 dark:text-slate-100 transition-colors relative`}>
       {/* Moving Ambient ASYV Background: Admin gets executive command matrix; students get scenic landscape */}
       <AnimatedAsyvBackground variant={isAdmin ? 'admin' : 'full'} />
 

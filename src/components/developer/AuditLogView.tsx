@@ -145,14 +145,14 @@ export const AuditLogView: React.FC = () => {
       <div className="bg-gradient-to-r from-[#1b4327] via-[#245934] to-[#122e1a] text-white rounded-3xl p-6 sm:p-8 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#eec149] mb-2">
-              <ShieldCheck className="w-4 h-4 text-[#eec149]" />
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#9a6b00] dark:text-[#eec149] mb-2">
+              <ShieldCheck className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
               <span>System Transparency & Compliance Oversight</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold font-display">
               Real-Time Security Audit Log
             </h2>
-            <p className="text-xs sm:text-sm text-emerald-100/90 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-emerald-100/90 mt-1 max-w-2xl leading-relaxed">
               Comprehensive tamper-evident record tracking all user logins, role authorizations, psychosocial emergency reports, grade leader edits, and administrative operations across Ingabe, Ingabo, and Ijabo.
             </p>
           </div>
@@ -161,18 +161,18 @@ export const AuditLogView: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={handleExportCsv}
-              className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border border-white/20"
+              className="px-3.5 py-2 bg-emerald-50 dark:bg-white/10 hover:bg-white/20 text-slate-900 dark:text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border border-white/20"
               title="Export filtered records to CSV"
             >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-300" />
+              <FileSpreadsheet className="w-4 h-4 text-emerald-700 dark:text-emerald-300" />
               <span>Export CSV</span>
             </button>
             <button
               onClick={handleExportJson}
-              className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border border-white/20"
+              className="px-3.5 py-2 bg-emerald-50 dark:bg-white/10 hover:bg-white/20 text-slate-900 dark:text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border border-white/20"
               title="Export filtered records to JSON"
             >
-              <FileCode className="w-4 h-4 text-[#eec149]" />
+              <FileCode className="w-4 h-4 text-[#9a6b00] dark:text-[#eec149]" />
               <span>Export JSON</span>
             </button>
             <button
@@ -190,7 +190,7 @@ export const AuditLogView: React.FC = () => {
       {/* Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
-          <div className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 dark:text-slate-500">
             Total Logged Events
           </div>
           <div className="text-3xl font-extrabold text-slate-900 dark:text-white font-display tabular-nums mt-1">
@@ -245,7 +245,7 @@ export const AuditLogView: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3.5 top-3" />
             <input
               type="text"
               value={searchQuery}
@@ -347,7 +347,7 @@ export const AuditLogView: React.FC = () => {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
+                  <td colSpan={6} className="py-12 text-center text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm">
                     No activity logs match the selected filter criteria.
                   </td>
                 </tr>
@@ -370,7 +370,7 @@ export const AuditLogView: React.FC = () => {
                       {/* Timestamp */}
                       <td className="py-3 px-4 font-mono text-[11px] text-slate-600 dark:text-slate-400 whitespace-nowrap">
                         <div className="font-bold text-slate-800 dark:text-slate-200">{formattedTime}</div>
-                        <div className="text-[10px] text-slate-400">{formattedDate}</div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400">{formattedDate}</div>
                       </td>
 
                       {/* User & Role */}
@@ -390,7 +390,7 @@ export const AuditLogView: React.FC = () => {
                             {log.grade}
                           </span>
                         ) : (
-                          <span className="text-slate-400 dark:text-slate-500 text-[11px]">—</span>
+                          <span className="text-slate-500 dark:text-slate-400 dark:text-slate-500 text-[11px]">—</span>
                         )}
                       </td>
 
@@ -468,7 +468,7 @@ export const AuditLogView: React.FC = () => {
               </div>
               <button
                 onClick={() => setSelectedLog(null)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer text-xs font-bold"
+                className="text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer text-xs font-bold"
               >
                 Close ✕
               </button>

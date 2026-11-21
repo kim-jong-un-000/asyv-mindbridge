@@ -247,7 +247,7 @@ export const Navbar: React.FC = () => {
   const isAdmin = currentUser?.role === 'developer';
 
   return (
-    <header className={`sticky top-0 z-40 ${isAdmin ? 'bg-[#081810] border-b border-[#245934]/70 text-slate-100' : 'bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800'} px-4 sm:px-6 py-2.5 transition-colors shadow-xs`}>
+    <header className={`sticky top-0 z-40 ${isAdmin ? 'bg-white dark:bg-[#081810] border-b border-[#245934]/30 dark:border-[#245934]/70 text-slate-900 dark:text-slate-100' : 'bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800'} px-4 sm:px-6 py-2.5 transition-colors shadow-xs`}>
       <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
         {/* Zone 1: ASYV Emblem + Brand wordmark */}
         <div className="flex items-center gap-3">

@@ -99,7 +99,7 @@ export const AnimatedAsyvBackground: React.FC<AnimatedAsyvBackgroundProps> = ({
         className={`fixed inset-0 pointer-events-none overflow-hidden select-none -z-10 transition-opacity duration-1000 ease-out ${className}`}
       >
         {/* 1. Base Executive Deep Obsidian-Emerald Slate Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#06140c] via-[#0c1f14] to-[#040e08] dark:from-[#030905] dark:via-[#07150d] dark:to-[#020503]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#f4f8f5] via-[#eaf2ec] to-[#dfece3] dark:from-[#06140c] dark:via-[#0c1f14] dark:to-[#040e08]" />
 
         {/* 2. Precision Architectural Blueprint Grid (SVG Pattern, Zero Blur) */}
         <svg className="absolute inset-0 w-full h-full opacity-40">
@@ -254,7 +254,7 @@ export const AnimatedAsyvBackground: React.FC<AnimatedAsyvBackgroundProps> = ({
       <div
         className={`absolute inset-0 transition-colors duration-1000 ${
           isAuth
-            ? 'bg-gradient-to-b from-[#0a1e12] via-[#13331c] to-[#1c4827] dark:from-[#040e07] dark:via-[#091f10] dark:to-[#0f2c17]'
+            ? 'bg-gradient-to-b from-[#f3f8f4] via-[#e7f1ea] to-[#d8e9dd] dark:from-[#0a1e12] dark:via-[#13331c] dark:to-[#1c4827]'
             : 'bg-gradient-to-b from-[#edf4ef] via-[#e2eee5] to-[#d3e5d8] dark:from-[#06120b] dark:via-[#0c2415] dark:to-[#122e1c]'
         }`}
       />
