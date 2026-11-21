@@ -1,0 +1,6 @@
+{
+  "name": "Mind Bridge - ASYV Psychosocial Support",
+  "description": "Comprehensive psychosocial school support platform connecting ASYV students, social workers, and mental champions across Ingabe, Ingabo, Ijabo, grades.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

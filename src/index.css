@@ -1,0 +1,279 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --font-heading: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* Agahozo-Shalom Youth Village Official Brand Palette */
+    --asyv-green: #245934;
+    --asyv-green-dark: #1b4327;
+    --asyv-green-light: #3a7a4f;
+    --asyv-orange: #d95f18;
+    --asyv-orange-warm: #f28e2b;
+    --asyv-yellow: #eec149;
+    --asyv-earth: #694e3b;
+    --asyv-sky: #0284c7;
+    --asyv-cream: #fdfbf7;
+    
+    /* Clean, highly readable, aesthetic base */
+    --app-bg: #f8fafc;
+    --app-text: #0f172a;
+  }
+
+  body {
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html.dark body {
+    background-color: #0b1120;
+    color: #f1f5f9;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+
+  /* Clear, highly readable form elements across all devices */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    color: #0f172a;
+    background-color: #ffffff;
+  }
+
+  html.dark input:not([type="checkbox"]):not([type="radio"]),
+  html.dark select,
+  html.dark textarea {
+    color: #f1f5f9;
+    background-color: #1e293b;
+    border-color: #334155;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #94a3b8;
+  }
+}
+
+/* ASYV Brand Utility Classes */
+.bg-asyv-green { background-color: #245934; }
+.bg-asyv-green-dark { background-color: #1b4327; }
+.bg-asyv-green-light { background-color: #3a7a4f; }
+.text-asyv-green { color: #245934; }
+.text-asyv-green-dark { color: #1b4327; }
+.border-asyv-green { border-color: #245934; }
+
+.bg-asyv-orange { background-color: #d95f18; }
+.bg-asyv-orange-warm { background-color: #f28e2b; }
+.text-asyv-orange { color: #d95f18; }
+.border-asyv-orange { border-color: #d95f18; }
+
+.bg-asyv-yellow { background-color: #eec149; }
+.text-asyv-yellow { color: #c99723; }
+
+.bg-asyv-earth { background-color: #694e3b; }
+.text-asyv-earth { color: #694e3b; }
+
+/* Custom scrollbar for chat, tables, and lists */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ==========================================================================
+   Sophisticated ASYV Organic Motion & Blurred Gradient Keyframes
+   Reflecting Rwanda's hills, Liquidnet solar gold, and village community
+   ========================================================================== */
+
+@keyframes asyv-drift-1 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(45px, -35px, 0) scale(1.06);
+  }
+  66% {
+    transform: translate3d(-30px, 25px, 0) scale(0.96);
+  }
+}
+
+@keyframes asyv-drift-2 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(-50px, 35px, 0) scale(1.05);
+  }
+  66% {
+    transform: translate3d(35px, -40px, 0) scale(0.95);
+  }
+}
+
+@keyframes asyv-drift-3 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(40px, 45px, 0) scale(1.08);
+  }
+}
+
+@keyframes asyv-drift-4 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-40px, -30px, 0) scale(1.04);
+  }
+}
+
+@keyframes asyv-breathe-watermark {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.18;
+  }
+  33% {
+    transform: translate3d(14px, -16px, 0) scale(1.025);
+    opacity: 0.28;
+  }
+  66% {
+    transform: translate3d(-12px, 12px, 0) scale(0.985);
+    opacity: 0.22;
+  }
+}
+
+@keyframes asyv-breathe-watermark-auth {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.38;
+  }
+  25% {
+    transform: translate3d(18px, -18px, 0) scale(1.03);
+    opacity: 0.48;
+  }
+  50% {
+    transform: translate3d(0, -26px, 0) scale(1.05);
+    opacity: 0.54;
+  }
+  75% {
+    transform: translate3d(-18px, -12px, 0) scale(1.02);
+    opacity: 0.44;
+  }
+}
+
+@keyframes asyv-halo-pulse {
+  0%, 100% {
+    transform: scale(0.95);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.75;
+  }
+}
+
+@keyframes asyv-mesh-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Fluid Organic Animation Utility Classes */
+.animate-asyv-drift-1 {
+  animation: asyv-drift-1 30s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+.animate-asyv-drift-2 {
+  animation: asyv-drift-2 36s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+.animate-asyv-drift-3 {
+  animation: asyv-drift-3 42s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+.animate-asyv-drift-4 {
+  animation: asyv-drift-4 34s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+.animate-asyv-watermark {
+  animation: asyv-breathe-watermark 22s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-asyv-watermark-auth {
+  animation: asyv-breathe-watermark-auth 22s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-asyv-halo {
+  animation: asyv-halo-pulse 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-asyv-mesh {
+  background-size: 200% 200%;
+  animation: asyv-mesh-shift 26s ease infinite;
+  will-change: background-position;
+}
+
+/* Crisp Card Presets (No Blur) */
+.asyv-glass-card {
+  background-color: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 4px 20px -2px rgba(27, 67, 39, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.dark .asyv-glass-card {
+  background-color: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* Respect user's reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .animate-asyv-drift-1,
+  .animate-asyv-drift-2,
+  .animate-asyv-drift-3,
+  .animate-asyv-drift-4,
+  .animate-asyv-watermark,
+  .animate-asyv-watermark-auth,
+  .animate-asyv-halo,
+  .animate-asyv-mesh {
+    animation: none !important;
+    transform: none !important;
+  }
+}

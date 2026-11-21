@@ -1,0 +1,497 @@
+{
+  "version": 10,
+  "lastUpdated": "2026-11-06T18:47:08.675Z",
+  "users": [
+    {
+      "id": "dev-master",
+      "name": "ASYV Master Administrator",
+      "email": "admin@ALVA",
+      "role": "developer",
+      "grade": "Ingabe",
+      "avatar": "/asyv_emblem.svg",
+      "password": "king@asyv2028",
+      "registeredAt": "2026-01-01T00:00:00Z",
+      "isPermanent": true,
+      "isRestricted": false
+    },
+    {
+      "id": "student-1793452863242",
+      "name": "Mihigo",
+      "familyName": "Innocent",
+      "email": "kingmihigo0@gmail.com",
+      "role": "student",
+      "grade": "Ingabo",
+      "schoolClass": "Senior 5 MPEG",
+      "avatar": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"50\" r=\"48\" fill=\"%23d95f18\" stroke=\"%23ffffff\" stroke-width=\"4\"/><text x=\"50\" y=\"58\" font-family=\"sans-serif\" font-size=\"20\" font-weight=\"900\" fill=\"%23ffffff\" text-anchor=\"middle\">INGABO</text></svg>",
+      "password": "king123",
+      "registeredAt": "2026-10-31T13:21:03.242Z",
+      "isPermanent": false,
+      "isRestricted": false,
+      "lastActive": "2026-10-31T13:21:03.482Z"
+    },
+    {
+      "id": "worker-1793452939433",
+      "name": "M arie Grace Mukamwezi",
+      "email": "maire.claire@asyv.org",
+      "role": "social_worker",
+      "grade": "Ingabe",
+      "avatar": "/asyv_emblem.svg",
+      "password": "worker2026!",
+      "registeredAt": "2026-10-31T13:22:19.433Z",
+      "isPermanent": false,
+      "isRestricted": false,
+      "lastActive": "2026-10-31T13:22:19.923Z"
+    },
+    {
+      "id": "worker-1793452972766",
+      "name": "Zivugugkuri Jean Marie Vianney",
+      "email": "zi.jmv@asyv.org",
+      "role": "social_worker",
+      "grade": "Ingabo",
+      "avatar": "/asyv_emblem.svg",
+      "password": "worker2026!",
+      "registeredAt": "2026-10-31T13:22:52.766Z",
+      "isPermanent": false,
+      "isRestricted": false,
+      "lastActive": "2026-10-31T13:22:53.441Z"
+    },
+    {
+      "id": "worker-1793453024825",
+      "name": "Ririrhafi Gamaniel",
+      "email": "ririhafi@asyv.org",
+      "role": "social_worker",
+      "grade": "Ijabo",
+      "avatar": "/asyv_emblem.svg",
+      "password": "worker2026!",
+      "registeredAt": "2026-10-31T13:23:44.825Z",
+      "isPermanent": false,
+      "isRestricted": false,
+      "lastActive": "2026-10-31T13:23:45.216Z"
+    },
+    {
+      "id": "student-1793533914891",
+      "name": "Mugisha",
+      "familyName": "Djibril",
+      "email": "mugishadjibril2020@gmail.com",
+      "role": "student",
+      "grade": "Ingabo",
+      "schoolClass": "Senior 5 MPEG",
+      "avatar": "/asyv_emblem.svg",
+      "password": "asyv2028",
+      "registeredAt": "2026-11-01T11:51:54.891Z",
+      "isPermanent": false,
+      "isRestricted": false,
+      "lastActive": "2026-11-01T11:51:55.472Z"
+    }
+  ],
+  "assignments": [
+    {
+      "id": "assign-1",
+      "title": "Senior 4 Ingabe: Settling In, Emotional Health & Family Bond",
+      "instructions": "Take a quiet moment to reflect on your journey to Agahozo-Shalom. Your responses are read solely by your assigned Grade Social Worker to support you.",
+      "creatorId": "worker-ingabe",
+      "creatorName": "Marie Grace Mukamwezi",
+      "grade": "Ingabe",
+      "dueDate": "2026-11-15",
+      "createdAt": "2026-10-20T08:00:00Z",
+      "questions": [
+        {
+          "id": "q1",
+          "type": "multiple_choice",
+          "prompt": "How are you adjusting to living in your ASYV family house?",
+          "options": [
+            "Very well and feeling supported",
+            "Adapting steadily step by step",
+            "A bit homesick but managing",
+            "Finding it quite challenging"
+          ]
+        },
+        {
+          "id": "q2",
+          "type": "open_ended",
+          "prompt": "What is one goal you want to achieve for your personal and emotional wellbeing this term?"
+        },
+        {
+          "id": "q3",
+          "type": "open_ended",
+          "prompt": "Is there anything you would like to discuss privately with your social worker this week?"
+        }
+      ],
+      "submissions": []
+    },
+    {
+      "id": "assign-2",
+      "title": "Senior 5 Ingabo: Stress Management & Study Strategy Review",
+      "instructions": "Reflect on how you organize your study schedule and decompress when coursework feels demanding.",
+      "creatorId": "worker-ingabo",
+      "creatorName": "Zivugugkuri Jean Marie Vianney",
+      "grade": "Ingabo",
+      "dueDate": "2026-11-20",
+      "createdAt": "2026-10-22T08:00:00Z",
+      "questions": [
+        {
+          "id": "q1",
+          "type": "multiple_choice",
+          "prompt": "Which time of day do you experience the highest cognitive energy for complex subjects?",
+          "options": [
+            "Early morning (5:30 - 7:00 AM)",
+            "Afternoon prep (2:00 - 4:00 PM)",
+            "Evening family study (7:30 - 9:30 PM)",
+            "Late night"
+          ]
+        },
+        {
+          "id": "q2",
+          "type": "open_ended",
+          "prompt": "Describe what grounding exercise or hobby helps you calm down after an intense test."
+        }
+      ],
+      "submissions": []
+    },
+    {
+      "id": "assign-3",
+      "title": "Senior 6 Ijabo: Exam Resilience & Leadership Reflection",
+      "instructions": "Preparing for national examinations while anchoring our school motto: Learn, Adapt and Lead.",
+      "creatorId": "worker-ijabo",
+      "creatorName": "Ririrhafi Gamaniel",
+      "grade": "Ijabo",
+      "dueDate": "2026-11-25",
+      "createdAt": "2026-10-24T08:00:00Z",
+      "questions": [
+        {
+          "id": "q1",
+          "type": "multiple_choice",
+          "prompt": "How confident do you feel in balancing revision time with adequate sleep?",
+          "options": [
+            "Very balanced and rested",
+            "Managing well most days",
+            "Struggling with sleep lately",
+            "Overwhelmed"
+          ]
+        },
+        {
+          "id": "q2",
+          "type": "open_ended",
+          "prompt": "Write down the main message of encouragement you would give to your fellow village brothers and sisters as you prepare to graduate."
+        }
+      ],
+      "submissions": []
+    }
+  ],
+  "dailyQuestions": [
+    {
+      "id": "dq-ingabe",
+      "grade": "Ingabe",
+      "socialWorkerId": "worker-ingabe",
+      "socialWorkerName": "Marie Grace Mukamwezi",
+      "question": "What is one kind deed a family house brother or sister did for you this week that made you smile?",
+      "contextNote": "Reflecting on mutual care builds brotherhood and sisterhood in Agahozo.",
+      "updatedAt": "2026-10-25T08:00:00Z"
+    },
+    {
+      "id": "dq-ingabo",
+      "grade": "Ingabo",
+      "socialWorkerId": "worker-ingabo",
+      "socialWorkerName": "Zivugugkuri Jean Marie Vianney",
+      "question": "When you face difficult academic prep or feel pressured, what single habit helps you find calm?",
+      "contextNote": "Sharing strategies helps us grow stronger as a grade community.",
+      "updatedAt": "2026-10-25T08:00:00Z"
+    },
+    {
+      "id": "dq-ijabo",
+      "grade": "Ijabo",
+      "socialWorkerId": "worker-ijabo",
+      "socialWorkerName": "Ririrhafi Gamaniel",
+      "question": "As you step toward national exams, what village lesson or memory gives you the highest courage?",
+      "contextNote": "Honoring our shared foundation: If you see far, you will go far.",
+      "updatedAt": "2026-10-25T08:00:00Z"
+    }
+  ],
+  "dailyAnswers": [],
+  "messages": [],
+  "emergencyAlerts": [],
+  "todos": [
+    {
+      "id": "todo-1",
+      "title": "Audit Senior 4 Ingabe initial wellness check-in questionnaires",
+      "dueDate": "2026-11-03",
+      "priority": "high",
+      "workerId": "dev-master",
+      "createdAt": "2026-10-25T08:00:00Z",
+      "isCompleted": false
+    },
+    {
+      "id": "todo-2",
+      "title": "Coordinate with Village Health Clinic on termly mental health workshop schedule",
+      "dueDate": "2026-11-04",
+      "priority": "high",
+      "workerId": "dev-master",
+      "createdAt": "2026-10-26T08:00:00Z",
+      "isCompleted": false
+    },
+    {
+      "id": "todo-3",
+      "title": "Review Peer Mental Champion applications for Senior 6 Ijabo candidates",
+      "dueDate": "2026-11-08",
+      "priority": "medium",
+      "workerId": "dev-master",
+      "createdAt": "2026-10-27T08:00:00Z",
+      "isCompleted": false
+    },
+    {
+      "id": "todo-4",
+      "title": "Verify Village Emergency Contact Hotline & WhatsApp numbers with Security Desk",
+      "dueDate": "2026-11-12",
+      "priority": "medium",
+      "workerId": "dev-master",
+      "createdAt": "2026-10-28T08:00:00Z",
+      "isCompleted": false
+    }
+  ],
+  "timetables": [
+    {
+      "id": "session-1",
+      "topic": "Overcoming Exam Anxiety & Cognitive Reframing",
+      "description": "Interactive workshop in the Quiet Study Hall with guided breathing, positive self-talk scripts, and group encouragement.",
+      "date": "2026-11-10",
+      "time": "16:30 - 17:30",
+      "targetGrades": "all",
+      "leaderName": "Ririrhafi",
+      "createdByWorkerId": "worker-ijabo",
+      "createdAt": "2026-10-20T08:00:00Z"
+    },
+    {
+      "id": "session-2",
+      "topic": "Peer Support & Active Listening Circle",
+      "description": "Monthly peer champion facilitation circle discussing active listening and how to support classmates experiencing distress.",
+      "date": "2026-11-12",
+      "time": "17:00 - 18:00",
+      "targetGrades": [
+        "Ingabe",
+        "Ingabo"
+      ],
+      "leaderName": "Marie Grace",
+      "createdByWorkerId": "worker-ingabe",
+      "createdAt": "2026-10-22T08:00:00Z"
+    }
+  ],
+  "wellnessLessons": [
+    {
+      "id": "lesson-1",
+      "title": "Building Emotional Resilience in the Face of Academic Setbacks",
+      "category": "resilience",
+      "description": "Understanding how to treat low grades or mistakes as data rather than defining personal worth.",
+      "content": "In Agahozo-Shalom, our student creed says: Learn, Adapt, and Lead. Growth mindset means our brain creates new neural pathways every time we analyze an error. When you receive a challenging score: 1) Acknowledge disappointment without judgment. 2) Schedule 10 minutes to walk through specific questions with your teacher. 3) Frame the lesson: What one concept did I learn today that I didn't know yesterday?",
+      "workerId": "worker-ingabo",
+      "workerName": "Zivugugkuri Jean Marie Vianney",
+      "targetGrades": "all",
+      "createdAt": "2026-10-15T08:00:00Z"
+    },
+    {
+      "id": "lesson-2",
+      "title": "Sleep Hygiene, Restorative Rest & Academic Performance",
+      "category": "mindfulness",
+      "description": "Why 7 to 8 hours of quality sleep directly impacts memory consolidation and emotional regulation.",
+      "content": "During deep sleep (REM and slow-wave), our hippocampus replays study notes and transfers them to long-term memory. Cutting sleep to cram notes actually degrades cognitive processing speed by up to 40%. Practice turning off electronic devices 30 minutes before dorm lights-out, do 3 minutes of slow 4-7-8 breathing, and keep your sleeping space calm.",
+      "workerId": "worker-ingabe",
+      "workerName": "Marie Grace Mukamwezi",
+      "targetGrades": "all",
+      "createdAt": "2026-10-18T08:00:00Z"
+    }
+  ],
+  "discussionPosts": [
+    {
+      "id": "disc-1",
+      "authorId": "student-diane",
+      "authorName": "Diane Umutoni",
+      "grade": "Ijabo",
+      "content": "Hello fellow champions! We are hosting a quiet meditation & tea circle on the dining hall porch tomorrow at 5 PM before dinner. All peer mentors and friends are welcome!",
+      "timestamp": "2026-10-26T15:00:00Z"
+    }
+  ],
+  "contactInfo": {
+    "updatedAt": "2026-11-03T09:55:56.655Z",
+    "officeHours": "Monday – Friday: 7:30 AM – 5:30 PM (24/7 on-call emergency coverage)",
+    "hotlinePhone": "+250 788 312 400",
+    "counselorLead": "Village Psychosocial Coordination Desk",
+    "whatsappPhone": "+250 788 312 401",
+    "customContacts": [],
+    "emergencyEmail": "wellbeing@asyv.org",
+    "officeLocation": "ASYV Psychosocial Support Center · Main Village Campus, Rubona",
+    "clinicExtension": "Village Health Center · Extension 104",
+    "additionalNotice": "Confidential, trauma-informed school care dedicated to ASYV youth wellness."
+  },
+  "announcements": [
+    {
+      "id": "ann-1",
+      "title": "Official Village Psychosocial Support & Counselor Availability",
+      "content": "All ASYV students across Ingabe, Ingabo, and Ijabo are warmly invited to visit their Grade Social Worker for confidential listening, personal wellness check-ins, or academic stress guidance. Counseling offices are open daily from 7:30 AM to 5:30 PM with 24/7 on-call coverage.",
+      "category": "wellness",
+      "targetGrades": "all",
+      "authorName": "ASYV Psychosocial Desk",
+      "createdAt": "2026-10-15T08:00:00Z",
+      "active": true
+    },
+    {
+      "id": "ann-2",
+      "title": "Senior 4 Ingabe: Village Transition & Family House Evening Circle",
+      "content": "Join your family house brothers and sisters this Thursday evening at the Community Center for our monthly orientation check-in. Refreshments and peer sharing circle.",
+      "category": "workshop",
+      "targetGrades": [
+        "Ingabe"
+      ],
+      "authorName": "Marie Grace Mukamwezi",
+      "createdAt": "2026-10-18T10:30:00Z",
+      "active": true
+    },
+    {
+      "id": "ann-3",
+      "title": "Senior 5 Ingabo: Academic Balance & Sleep Hygiene Workshop",
+      "content": "Balancing multiple subject combinations with dormitory life can feel intense. Join counselor Zivugugkuri for a practical session on Pomodoro study habits, active recall, and proper rest.",
+      "category": "wellness",
+      "targetGrades": [
+        "Ingabo"
+      ],
+      "authorName": "Zivugugkuri Jean Marie Vianney",
+      "createdAt": "2026-10-20T14:00:00Z",
+      "active": true
+    },
+    {
+      "id": "ann-4",
+      "title": "Senior 6 Ijabo: National Exam Mindfulness & Calm Focus Sessions",
+      "content": "As national examinations approach, we have daily morning grounding circles in the Quiet Library Gazebo. Breathe, center your thoughts, and remember: “Urebeye kure ugera kure”.",
+      "category": "urgent",
+      "targetGrades": [
+        "Ijabo"
+      ],
+      "authorName": "Ririrhafi Gamaniel",
+      "createdAt": "2026-10-22T09:15:00Z",
+      "active": true
+    }
+  ],
+  "wellnessTips": [
+    {
+      "id": "tip-1",
+      "category": "study",
+      "title": "Active Recall & Spaced Practice",
+      "summary": "Instead of re-reading notes passively, close your book and write down key concepts from memory. Review at 1, 3, and 7-day intervals.",
+      "actionable": "Test yourself with 5 flash questions after every evening study prep.",
+      "authorName": "ASYV Academic Desk",
+      "createdAt": "2026-10-10T08:00:00Z"
+    },
+    {
+      "id": "tip-2",
+      "category": "stress",
+      "title": "Box Breathing (Navy SEAL Protocol)",
+      "summary": "Inhale for 4 counts, hold for 4, exhale for 4, hold empty for 4. Repeat for 4 full cycles to slow your heart rate.",
+      "actionable": "Practice this anytime your chest feels tight or thoughts start racing.",
+      "authorName": "Village Psychosocial Desk",
+      "createdAt": "2026-10-10T08:00:00Z"
+    },
+    {
+      "id": "tip-3",
+      "category": "social",
+      "title": "Empathetic Active Listening in Family Houses",
+      "summary": "When a village brother or sister shares a struggle, resist the urge to immediately solve it. First validate their emotions.",
+      "actionable": "Say: \"That sounds genuinely heavy. Thank you for trusting me with it. I am here with you.\"",
+      "authorName": "Counseling Lead",
+      "createdAt": "2026-10-10T08:00:00Z"
+    },
+    {
+      "id": "tip-4",
+      "category": "living",
+      "title": "Living in ASYV Village Harmony",
+      "summary": "Our village is built on dignity, mutual respect, and community solidarity. Small acts of cleanliness and respect lift everyone.",
+      "actionable": "Greet one staff worker or junior student warmly each morning.",
+      "authorName": "Village Life Director",
+      "createdAt": "2026-10-10T08:00:00Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "audit-1793990828675-kqo2s9",
+      "timestamp": "2026-11-06T18:47:08.675Z",
+      "userId": "system-server",
+      "userName": "ASYV Central Backend",
+      "userRole": "developer",
+      "grade": "Ingabe",
+      "action": "APP_CUSTOMIZED",
+      "details": "Global ASYV customization settings saved centrally",
+      "severity": "info",
+      "ipOrDevice": "127.0.0.1"
+    },
+    {
+      "id": "audit-1793990819872-v81w2r",
+      "timestamp": "2026-11-06T18:46:59.872Z",
+      "userId": "system-server",
+      "userName": "ASYV Central Backend",
+      "userRole": "developer",
+      "grade": "Ingabe",
+      "action": "APP_CUSTOMIZED",
+      "details": "Admin uploaded and automatically updated the front page welcome photo permanently (/uploads/welcome_hero_1793990819870.png)",
+      "severity": "info",
+      "ipOrDevice": "127.0.0.1"
+    },
+    {
+      "id": "audit-1",
+      "timestamp": "2026-10-31T06:00:00Z",
+      "userId": "dev-master",
+      "userName": "ASYV Master Administrator",
+      "userRole": "developer",
+      "grade": "Ingabe",
+      "action": "SECURITY_CHECK",
+      "details": "Administrator verified system governance, database schema, and counselor assignments for all 3 grades.",
+      "severity": "info",
+      "ipOrDevice": "System Host"
+    }
+  ],
+  "appCustomization": {
+    "loginNotice": "Restricted Official Village Care Network · Authorized access only",
+    "portalTitle": "Mind Bridge",
+    "schoolMotto": "LEARN, ADAPT AND LEAD",
+    "footerTagline": "made to support the ASYV social workers support!",
+    "portalSubtitle": "The Agahozo Shalom Youth Village Psychosocial Platform",
+    "schoolSubMotto": "Ingabe · Ingabo · Ijabo",
+    "accentBrandColor": "#d95f18",
+    "activeAsyvPalette": "terracotta",
+    "customQuoteAuthor": "Anne Heyman, ASYV Founder",
+    "primaryBrandColor": "#245934",
+    "welcomeBannerTitle": "Do you need any help from your counselor today?",
+    "welcomeBannerSubtitle": "Your Grade social worker is available right now for confidential listening, academic support, or personal guidance.",
+    "customInspirationalQuote": "If you see far, you will go far. Every child deserves a place to heal, grow, and become a leader.",
+    "allowPublicWorkerRegistration": false,
+    "allowPublicStudentRegistration": true,
+    "strategicPlanImageUrl": "/assets/aistudio/download_954a9c9b.jpg"
+  },
+  "kudosPosts": [
+    {
+      "id": "kudos-1",
+      "senderGrade": "Ingabo",
+      "recipientGrade": "Ingabe",
+      "recipientName": "To all Senior 4 students in Family House 3",
+      "category": "kindness",
+      "message": "Shoutout to our junior brothers and sisters for maintaining incredible cleanliness and bringing bright positive energy during morning assembly!",
+      "createdAt": "2026-10-24T12:00:00Z",
+      "likesCount": 6,
+      "likedBy": []
+    },
+    {
+      "id": "kudos-2",
+      "senderGrade": "Ijabo",
+      "recipientGrade": "all",
+      "recipientName": "To the Village Dining Hall Family & Kitchen Staff",
+      "category": "gratitude",
+      "message": "Thank you for the nutritious meals and smiling faces that keep us nourished through rigorous study preps every single day!",
+      "createdAt": "2026-10-25T14:30:00Z",
+      "likesCount": 12,
+      "likedBy": []
+    }
+  ],
+  "journalEntries": [],
+  "moodLogs": [],
+  "stoppedAlerts": {
+    "todo-1": true,
+    "todo-2": true,
+    "todo-3": true
+  }
+}

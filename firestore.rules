@@ -1,0 +1,31 @@
+rules_version = '2';
+
+// Mind Bridge admin login is handled by the app server (not Firebase Auth), so these rules
+// validate the shape and size of landing-media documents instead of the caller's identity.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /app_settings/landing_media {
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasOnly(['url', 'mediaId', 'name', 'updatedBy', 'updatedAt'])
+        && request.resource.data.url is string
+        && request.resource.data.url.size() < 1000000;
+    }
+
+    match /app_settings/customization {
+      allow read: if true;
+      allow write: if request.resource.size() < 1000000;
+    }
+
+    match /landing_media_library/{mediaId} {
+      allow read: if true;
+      allow create: if request.resource.data.url is string
+        && request.resource.data.url.size() < 1000000
+        && request.resource.data.name is string;
+      allow delete: if true;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
