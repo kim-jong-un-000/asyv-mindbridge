@@ -805,7 +805,7 @@ app.post('/api/upload-hero-image', (req, res) => {
 
     // Broadcast immediately over WebSocket to all open tabs and devices worldwide
     broadcast({
-      type: 'STATE_MUTATION',
+      type: 'REMOTE_ACTION',
       action: 'UPDATE_APP_CUSTOMIZATION',
       payload: db.appCustomization,
       version: db.version,
